@@ -5,11 +5,11 @@ const mongoose = require('mongoose');
 const authRoutes = require('./routes/auth');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5000;
 
 app.use(express.json());
 
-mongoose.connect('mongodb://localhost:3000', {
+mongoose.connect('mongodb+srv://davtevhstudio:Temiloluwa123@cluster0.bxhwa3c.mongodb.net/?retryWrites=true&w=majority', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
