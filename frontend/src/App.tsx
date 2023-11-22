@@ -9,7 +9,7 @@ const Register = lazy(() => import("./routes/Register"));
 const LoggedIn = lazy(() => import("./routes/LoggedIn"));
 
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(true);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
 
   return (
     <Fragment>
