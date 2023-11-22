@@ -18,6 +18,7 @@ export const HomePage = () => {
         <Button
           className="w-full"
           icon={<ArrowRightIcon className="h-4 w-4 text-inherit" />}
+          to="/register"
         >
           Get Started
         </Button>
