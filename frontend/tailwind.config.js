@@ -130,6 +130,9 @@ module.exports = {
       fontFamily: {
         lato: ["Lato", "sans serif"],
       },
+      backgroundImage: {
+        iconButton: "linear-gradient(145deg, #000E89 33.13%, #001AFF 88.61%)",
+      },
       colors: {
         brand: {
           main: "#000E89",
@@ -171,6 +174,7 @@ module.exports = {
           "0px -4px 4px 0px rgba(0, 0, 0, 0.15) inset, 0px 4px 4px 0px rgba(0, 0, 0, 0.15) inset",
         pressedOutline:
           "0px 1px 2px 0px rgba(0, 0, 0, 0.30), 0px 4px 4px 2px rgba(0, 0, 0, 0.05) inset",
+        nav: "0px 2px 4px 0px rgba(0, 0, 0, 0.08)",
       },
     },
   },

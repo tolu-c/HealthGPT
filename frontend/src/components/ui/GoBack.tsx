@@ -11,7 +11,7 @@ export const GoBack: FC<TGoBack> = ({ to }) => {
 
   return (
     <span
-      className="w-6 h-6 flex items-center justify-center cursor-pointer p-2.5 absolute top-0 left-0 flex-none z-50"
+      className="w-9 h-9 flex items-center justify-center cursor-pointer absolute top-0 left-0 z-50 flex-none"
       onClick={() => navigate(to)}
     >
       <ChevronLeftIcon className="w-6 h-6 text-black-100" />

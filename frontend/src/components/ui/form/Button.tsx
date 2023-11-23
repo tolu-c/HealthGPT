@@ -2,7 +2,7 @@ import { ButtonHTMLAttributes, FC, ReactNode } from "react";
 import { cva, VariantProps } from "class-variance-authority";
 import { useNavigate } from "react-router";
 import { cn } from "utils";
-import { Loader } from "./Loader";
+import { Loader } from "../Loader";
 
 const buttonVariants = cva(
   "active:scale-95 disabled:cursor-not-allowed flex items-center justify-center gap-2 rounded-[10px] h-[52px] w-[155px] px-6 py-2.5 font-lato",
@@ -14,6 +14,8 @@ const buttonVariants = cva(
         outline:
           "border border-brand-main text-brand-main hover:shadow-hoverOutline active:shadow-pressedOutline disabled:border-white-500 disabled:text-black-500 disabled:shadow-none",
         text: "bg-transparent text-brand-main hover:bg-white-200 active:bg-white-200 disabled:bg-transparent disabled:text-black-500",
+        secondary:
+          "border border-white-500 text-black-100 hover:bg-white-200 disabled:border-white-500 disabled:text-black-500",
       },
     },
     defaultVariants: {
@@ -58,7 +60,7 @@ export const Button: FC<TButton> = ({
       disabled={isLoading}
       {...props}
     >
-      <span className="text-label-lg">{children}</span>
+      <span className="text-label-lg flex items-center gap-2">{children}</span>
       {isLoading ? <Loader /> : icon}
     </button>
   );

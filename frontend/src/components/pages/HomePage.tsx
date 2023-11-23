@@ -1,5 +1,5 @@
 import logo from "assets/images/logo.png";
-import { Button } from "components/ui/Button";
+import { Button } from "components/ui/form/Button";
 import { ArrowRightIcon } from "@heroicons/react/20/solid";
 
 export const HomePage = () => {

@@ -7,9 +7,12 @@ import { registerSchema } from "utils/zodValidation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ZodError, z } from "zod";
+import { useContext } from "react";
+import { AuthContext } from "store/AuthContext";
 
 type FormData = z.infer<typeof registerSchema>;
-export const RegisterPage = () => {
+
+export const LoginPage = () => {
   const {
     register,
     handleSubmit,
@@ -19,13 +22,16 @@ export const RegisterPage = () => {
     resolver: zodResolver(registerSchema),
   });
   const navigate = useNavigate();
+  const { login } = useContext(AuthContext);
 
-  const handleRegister = async ({ email, password }: FormData) => {
+  const handleLogin = async ({ email, password }: FormData) => {
     try {
       const validDetails = registerSchema.parse({ email, password });
       // todo => perform server action
+      // ? login example
+      login();
       console.log(validDetails);
-      navigate("/verify-email");
+      navigate("/chat");
     } catch (error) {
       if (error instanceof ZodError) {
         setError(
@@ -49,14 +55,14 @@ export const RegisterPage = () => {
   };
 
   const onSubmit = (data: FormData) => {
-    handleRegister(data);
+    handleLogin(data);
   };
 
   return (
     <div className="w-screen h-[100svh] flex justify-center px-5 pt-16 bg-white-main font-lato">
       <div className="w-full h-auto relative flex flex-col gap-y-16 items-center">
         <GoBack to="/" />
-        <h1 className="w-max text-black-100 text-title-lg">Sign up</h1>
+        <h1 className="w-max text-black-100 text-title-lg">Log in</h1>
         <div className="w-full flex flex-col items-start gap-y-8">
           <form
             className="w-full flex flex-col items-start gap-y-3"
@@ -79,12 +85,18 @@ export const RegisterPage = () => {
                 // disabled
                 error={errors.password?.message}
               />
+              <Link
+                to={"/forgot-password"}
+                className="text-body-sm text-brand-main font-lato -mt-3"
+              >
+                I forgot my password
+              </Link>
             </div>
             <Button className="w-full">Sign Up</Button>
             <p className="w-full text-center text-black-400 text-body-md">
-              Already have an account?{" "}
-              <Link to={"/login"} className="text-brand-main">
-                Login
+              Don't have an account?{" "}
+              <Link to={"/register"} className="text-brand-main">
+                Sign Up
               </Link>
             </p>
           </form>
