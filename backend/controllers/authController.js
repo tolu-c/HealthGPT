@@ -3,27 +3,35 @@ const nodemailer = require('nodemailer');
 const otpGenerator = require('otp-generator');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const JWT_SECRET = process.env.JWT_SECRET;
 const uuid = require('uuid');
+
+
 
 // Function to send an email
 const sendEmail = async (to, subject, text) => {
-  const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      //where we put out own personal gmail
-      user: 'your-email@gmail.com',
-      pass: 'your-email-password',
-    },
-  });
+  try {
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.GMAIL_USER,
+        pass: process.env.GMAIL_PASS,
+      },
+    });
 
-  const mailOptions = {
-    from: 'your-email@gmail.com',
-    to: to,
-    subject: subject,
-    text: text,
-  };
+    const mailOptions = {
+      from: process.env.GMAIL_USER,
+      to,
+      subject,
+      text,
+    };
 
-  await transporter.sendMail(mailOptions);
+    await transporter.sendMail(mailOptions);
+    console.log('Email sent successfully');
+  } catch (error) {
+    console.error('Error sending email:', error);
+    throw error;
+  }
 };
 
 const authController = {
@@ -70,11 +78,11 @@ const authController = {
         return res.status(401).json({ message: 'Invalid password' });
       }
 
-      // Implement your token generation logic here
-      // const token = generateToken(user);
-      // res.json({ token });
+      // Generate a JWT token
+      const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '1h' });
 
-      res.json({ message: 'Login successful' });
+      // Send the token in the response
+      res.json({ token, message: 'Login successful' });
     } catch (error) {
       console.error(error);
       res.status(500).send('Internal Server Error');
@@ -151,12 +159,24 @@ const authController = {
       // Implement your email verification logic here
       // Example: compare the received OTP with the stored OTP
       const { email, otp } = req.body;
+  
       // Retrieve the stored OTP from your database or any storage mechanism
-      const storedEmailVerificationOTP = 'retrieve_from_database';
-
+      // Example: Fetch the user from the database
+      const user = await User.findOne({ email });
+  
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+  
+      // Retrieve the stored OTP from the user document in the database
+      const storedEmailVerificationOTP = user.emailVerificationOTP;
+  
       if (otp === storedEmailVerificationOTP) {
         // Update the user's email verification status in the database
         // For example: await User.updateOne({ email }, { isVerified: true });
+        user.isVerified = true;
+        await user.save();
+  
         res.status(200).json({ message: 'Email verified successfully.' });
       } else {
         res.status(401).json({ message: 'Invalid OTP. Email verification failed.' });
@@ -165,7 +185,7 @@ const authController = {
       console.error(error);
       res.status(500).send('Internal Server Error');
     }
-  },
+  },  
 };
 
 module.exports = authController;

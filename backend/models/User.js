@@ -20,6 +20,9 @@ const userSchema = new mongoose.Schema({
   passwordResetTokenExpiration: {
     type: Date,
   },
+  emailVerificationOTP: {
+    type: String,
+  },
 });
 
 const User = mongoose.model('User', userSchema);
