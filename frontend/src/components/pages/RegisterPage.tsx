@@ -1,7 +1,6 @@
 import { GoogleIcon } from "assets/svg/icons";
 import { Button } from "components/ui/form/Button";
 import { Input } from "components/ui/form/Input";
-import { GoBack } from "components/ui/GoBack";
 import { Link, useNavigate } from "react-router-dom";
 import { registerSchema } from "utils/zodValidation";
 import { useForm } from "react-hook-form";
