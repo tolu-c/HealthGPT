@@ -4,8 +4,8 @@ import { ArrowRightIcon } from "@heroicons/react/20/solid";
 
 export const HomePage = () => {
   return (
-    <div className="w-screen h-[100svh] flex items-center justify-center font-lato px-5">
-      <div className="w-full flex flex-col items-center gap-y-[72px]">
+    <div className="w-screen h-[100svh] flex justify-center font-lato px-5 pt-7">
+      <div className="w-full flex flex-col items-center gap-y-16">
         <div className="w-full flex flex-col gap-y-10 items-center">
           <img src={logo} alt="logo" className="w-max h-auto" />
           <p className="text-body-lg text-center text-black-main">
