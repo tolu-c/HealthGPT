@@ -5,6 +5,9 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const authRoutes = require('./routes/auth');
 const cors = require('cors');
+const passport = require('passport');
+const session = require('express-session');
+
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -22,6 +25,13 @@ mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true 
 // Middleware
 app.use(bodyParser.json());
 app.use(cors());
+
+// Initialize Passport and use the express-session middleware
+app.use(session({ secret: process.env.SESSION_SECRET, resave: true, saveUninitialized: true }));
+app.use(passport.initialize());
+app.use(passport.session());
+
+
 
 // Routes
 app.use('/api', authRoutes);
