@@ -5,6 +5,42 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const JWT_SECRET = process.env.JWT_SECRET;
 const uuid = require('uuid');
+const passport = require('passport'); 
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
+
+
+passport.serializeUser((user, done) => {
+  done(null, user.id);
+});
+
+passport.deserializeUser((id, done) => {
+  User.findById(id, (err, user) => {
+    done(err, user);
+  });
+});
+
+passport.use(new GoogleStrategy({
+  clientID: process.env.GOOGLE_CLIENT_ID,
+  clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+  callbackURL: process.env.GOOGLE_CALLBACK_URL,
+}, async (accessToken, refreshToken, profile, done) => {
+  try {
+    const existingUser = await User.findOne({ googleId: profile.id });
+
+    if (existingUser) {
+      return done(null, existingUser);
+    }
+
+    const newUser = await User.create({
+      googleId: profile.id,
+      email: profile.emails[0].value,
+    });
+
+    return done(null, newUser);
+  } catch (error) {
+    return done(error, null);
+  }
+}));
 
 
 
@@ -80,6 +116,7 @@ const authController = {
 
       // Generate a JWT token
       const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '1h' });
+    
 
       // Send the token in the response
       res.json({ token, message: 'Login successful' });
@@ -154,6 +191,20 @@ const authController = {
     }
   },
 
+  logout: async(req, res) => {
+    try {
+      // For example, using Passport.js:
+      req.logout();
+  
+      // Redirect to the home page or any other page after logout
+      res.status(200).json({ message: 'Logout successful' });
+    } catch (error) {
+      console.error('Error during logout:', error);
+      res.status(500).json({ message: 'Internal Server Error' });
+    }
+  },
+  
+
   verifyEmail: async (req, res) => {
     try {
       // Implement your email verification logic here
@@ -178,14 +229,28 @@ const authController = {
         await user.save();
   
         res.status(200).json({ message: 'Email verified successfully.' });
-      } else {
+      } else {  
         res.status(401).json({ message: 'Invalid OTP. Email verification failed.' });
       }
     } catch (error) {
       console.error(error);
       res.status(500).send('Internal Server Error');
     }
-  },  
+
+  },
+  googleLogin: passport.authenticate('google', { scope: ['profile', 'email'] }),
+
+  googleCallback: passport.authenticate('google', { failureRedirect: '/' }),
+
+  googleCallbackSuccess: (req, res) => {
+    // Redirect to the chat page or any other page after successful Google Sign-In
+    res.redirect('/chat'); // Change '/chat' to your desired page URL
+  },
+
 };
+
+
+
+
 
 module.exports = authController;

@@ -1,3 +1,6 @@
 const crypto = require('crypto');
-const secretKey = crypto.randomBytes(32).toString('hex');
-console.log(`JWT_SECRET=${secretKey}`); 
+const jwtSecretKey = crypto.randomBytes(32).toString('hex');
+const sessionSecretKey = crypto.randomBytes(32).toString('hex');
+
+console.log(`JWT_SECRET=${jwtSecretKey}`);
+console.log(`SESSION_SECRET=${sessionSecretKey}`);
