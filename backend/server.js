@@ -21,6 +21,8 @@ mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true 
     console.error('MongoDB connection error:', error);
   });
 
+// Load environment variables
+const { WIT_AI_ACCESS_TOKEN, SESSION_SECRET } = process.env;
 
 // Middleware
 app.use(bodyParser.json());

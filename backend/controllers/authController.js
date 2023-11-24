@@ -7,6 +7,8 @@ const JWT_SECRET = process.env.JWT_SECRET;
 const uuid = require('uuid');
 const passport = require('passport'); 
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
+const { Wit } = require('node-wit');
+const witClient = new Wit({ accessToken: process.env.WIT_AI_ACCESS_TOKEN });
 
 
 passport.serializeUser((user, done) => {
@@ -74,29 +76,38 @@ const authController = {
   signup: async (req, res) => {
     try {
       const { email, password } = req.body;
-
+  
       // Check if the user already exists
       const existingUser = await User.findOne({ email });
       if (existingUser) {
         return res.status(400).json({ message: 'User already exists with this email.' });
       }
-
+  
+    // Check if the password is provided and not an empty string
+    if (!password || password.trim() === '') {
+      console.log('Password is missing or empty!');
+      return res.status(400).json({ message: 'Password is required.' });
+    }
+  
       // Hash the password
+      console.log('Password before hashing:', password);
       const hashedPassword = await bcrypt.hash(password, 10);
-
+      console.log('Password after hashing:', hashedPassword);
+  
       // Create a new user in the database
       const newUser = await User.create({ email, password: hashedPassword });
-
+  
       // Send email verification OTP
       const emailVerificationOTP = otpGenerator.generate(6, { upperCase: false, specialChars: false });
       await sendEmail(email, 'Email Verification OTP', `Your OTP is: ${emailVerificationOTP}`);
-
+  
       res.status(201).json({ message: 'Signup successful. Check your email for verification.' });
     } catch (error) {
-      console.error(error);
+      console.error('Error during signup:', error);
       res.status(500).send('Internal Server Error');
     }
   },
+
 
   login: async (req, res) => {
     try {
@@ -247,10 +258,42 @@ const authController = {
     res.redirect('/chat'); // Change '/chat' to your desired page URL
   },
 
+  chat: async (req, res) => {
+    try {
+      const { message } = req.body;
+  
+      console.log('Received message:', message);
+  
+      // Process the user's message using Wit.ai
+      const witResponse = await witClient.message(message);
+      console.log('Wit.ai response:', witResponse);
+  
+      // Extract relevant information from Wit.ai response
+      const intent = (witResponse.intents && witResponse.intents.length > 0) ? witResponse.intents[0].name : 'unknown';
+      const entities = witResponse.entities;
+  
+      // Log the detected intent and entities
+      console.log('Detected Intent:', intent);
+      console.log('Detected Entities:', entities);
+  
+      // Perform actions based on the detected intent and entities
+      let responseMessage = 'I\'m sorry, I didn\'t understand that.';
+  
+      // Example: Handle a "health_issue" intent
+      if (intent === 'health_issue' && entities && entities['health_condition'] && entities['health_condition'].length > 0) {
+        const condition = entities['health_condition'][0].value;
+        // Perform logic to provide information or remedy for the health condition
+        responseMessage = `It seems you are concerned about ${condition}. Here is some information and advice...`;
+      }
+  
+      // Send the response back to the user
+      res.status(200).json({ message: responseMessage });
+    } catch (error) {
+      console.error('Error during chat processing:', error);
+      res.status(500).json({ message: 'Internal Server Error' });
+    }
+  },
 };
-
-
-
 
 
 module.exports = authController;
