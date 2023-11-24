@@ -31,7 +31,7 @@ export const LoginPage = () => {
       // ? login example
       login();
       console.log(validDetails);
-      navigate("/chat");
+      navigate("/chat/new");
     } catch (error) {
       if (error instanceof ZodError) {
         setError(

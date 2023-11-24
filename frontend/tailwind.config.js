@@ -165,6 +165,7 @@ module.exports = {
         extra: {
           error: "#FA1111",
         },
+        suggestion: "rgba(0, 0, 0, 0.03)",
       },
       boxShadow: {
         hoverFilled:

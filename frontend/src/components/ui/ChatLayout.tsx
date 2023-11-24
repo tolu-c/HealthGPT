@@ -14,10 +14,12 @@ export const ChatLayout: FC<TChatLayout> = ({ children }) => {
   const handleCloseSidebar = () => setIsSidebarOpen(false);
 
   return (
-    <div className="flex flex-col w-screen h-[100svh] relative">
+    <div className="flex flex-col w-screen h-[100svh]">
       <NavBar title="New Chat" openSidebar={handleOpenSidebar} />
-      <main className="border">{children}</main>
-      <div className="fixed bottom-0 w-full px-5 py-2 flex flex-col items-center">
+      <main className="border grow h-full overflow-y-scroll border-black-main hide-scrollbar">
+        {children}
+      </main>
+      <div className="w-full px-5 py-2 flex flex-col items-center flex-none">
         <MessageInput />
         <p className="font-lato text-black-500 text-[10px] leading-5 tracking-[0.25px] text-center">
           HealthGPT is not perfect, please if symptoms persist, visit a medical
