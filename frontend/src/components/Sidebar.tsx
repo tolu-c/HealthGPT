@@ -1,4 +1,5 @@
 import {
+  ArrowLeftOnRectangleIcon,
   ChevronDoubleLeftIcon,
   MoonIcon,
   PlusIcon,
@@ -8,13 +9,14 @@ import {
   ArrowRightOnRectangleIcon,
   MicrophoneIcon,
 } from "@heroicons/react/24/outline";
-import { FC, ReactNode, useContext } from "react";
+import { FC, ReactNode, useContext, useState } from "react";
 import { createPortal } from "react-dom";
 import { ThemeContext } from "store/themeContext";
 import profile from "assets/images/profile.png";
 import { AuthContext } from "store/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { ChatHistory } from "./ChatHistory";
+import { Modal } from "./ui/Modal";
 
 type TSidebar = {
   closeSidebar: () => void;
@@ -23,8 +25,12 @@ export const Sidebar: FC<TSidebar> = ({ closeSidebar }) => {
   const { theme, toggleTheme } = useContext(ThemeContext);
   const { logout } = useContext(AuthContext);
   const navigate = useNavigate();
+  const [openConfirmationModal, setOpenConfirmationModal] =
+    useState<boolean>(false);
 
   const newChat = () => navigate("/chat/new");
+  const closeModal = () => setOpenConfirmationModal(false);
+  const openModal = () => setOpenConfirmationModal(true);
 
   const content: ReactNode = (
     <div className="fixed top-0 left-0 h-[100svh] max-h-[100lvh] bg-white-main z-[60] w-[343px] flex flex-col items-start">
@@ -89,12 +95,43 @@ export const Sidebar: FC<TSidebar> = ({ closeSidebar }) => {
           </div>
           <span
             className="p-1.5 w-8 h-8 cursor-pointer border-[0.5px] border-black-600 rounded-md"
-            onClick={logout}
+            onClick={openModal}
           >
             <ArrowRightOnRectangleIcon className="h-5 w-5 text-extra-error" />
           </span>
         </div>
       </div>
+      {openConfirmationModal ? (
+        <Modal
+          close={closeModal}
+          title="Logout"
+          leftIcon={
+            <span className="w-full h-full rounded-full p-1.5 flex items-center justify-center bg-extra-error/10">
+              <ArrowLeftOnRectangleIcon className="h-5 w-5 text-extra-error" />
+            </span>
+          }
+        >
+          <div className="w-full flex flex-col gap-4">
+            <p className="w-full text-center font-lato text-body-sm text-black-200">
+              Are you sure you want to logout?
+            </p>
+            <div className="w-full flex items-center gap-8">
+              <button
+                className="w-full border border-black-500 rounded-[10px] h-[38px] flex items-center justify-center font-lato text-body-sm text-black-200"
+                onClick={closeModal}
+              >
+                cancel
+              </button>
+              <button
+                className="w-full border border-extra-error rounded-[10px] h-[38px] flex items-center justify-center font-lato text-body-sm text-extra-error"
+                onClick={logout}
+              >
+                logout
+              </button>
+            </div>
+          </div>
+        </Modal>
+      ) : null}
     </div>
   );
 
