@@ -165,6 +165,8 @@ module.exports = {
         extra: {
           error: "#FA1111",
         },
+        suggestion: "rgba(0, 0, 0, 0.03)",
+        comingSonn: "rgba(0, 255, 26, 0.10)",
       },
       boxShadow: {
         hoverFilled:
@@ -175,6 +177,7 @@ module.exports = {
         pressedOutline:
           "0px 1px 2px 0px rgba(0, 0, 0, 0.30), 0px 4px 4px 2px rgba(0, 0, 0, 0.05) inset",
         nav: "0px 2px 4px 0px rgba(0, 0, 0, 0.08)",
+        sidebar: "0px 1px 4px 0px rgba(0, 0, 0, 0.25)",
       },
     },
   },

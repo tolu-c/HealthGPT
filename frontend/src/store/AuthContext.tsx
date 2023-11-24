@@ -7,7 +7,7 @@ export const AuthContext = createContext({
 });
 
 export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
-  const [userLoggedIn, setUserLoggedIn] = useState(false);
+  const [userLoggedIn, setUserLoggedIn] = useState(true);
 
   const loginHandler = () => {
     setUserLoggedIn(true);
