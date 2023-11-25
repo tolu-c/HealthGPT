@@ -46,78 +46,81 @@
 
   const authController = {
     signup: async (req, res) => {
-        try {
-    
-          console.log('Received request body:', req.body);
-          const { email, password } = req.body;
-
-          console.log('Email:', email);
-          console.log('Password:', password);
-          
-    
-          // Check if the user already exists
-          const existingUser = await User.findOne({ email });
-          if (existingUser) {
-            return res.status(400).json({ message: 'User already exists with this email.' });
-          }
-              
-          // Check if the password is provided
-          if (!password) {
-            console.log('Password is missing!');
-            return res.status(400).json({ message: 'Password is required.' });
-          }
-                        
-          // Hash the password
-          console.log('Password before hashing:', password);
-          const hashedPassword = await bcrypt.hash(password, 10);
-          console.log('Password after hashing:', hashedPassword);
-    
-          // Create a new user in the database with email verification status set to false
-          const newUser = await User.create({
-            email,
-            password: hashedPassword,
-            isVerified: false, // Set to false initially
-            emailVerificationOTP: otpGenerator.generate(6, { upperCase: false, specialChars: false }),
-          });
-    
-          // Send email verification OTP
-          await sendEmail(email, 'Email Verification OTP', `Your OTP is: ${newUser.emailVerificationOTP}`);
-    
-          res.status(201).json({ message: 'Signup successful. Check your email for verification.' });
-        } catch (error) {
-          console.error('Error during signup:', error);
-          res.status(500).json({ message: 'Internal Server Error during signup' });
+      try {
+        console.log('Received request body:', req.body);
+        const { email, password, fullName } = req.body;
+  
+        console.log('Email:', email);
+        console.log('Password:', password);
+        console.log('Full Name:', fullName);
+  
+        // Check if the user already exists
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+          return res.status(400).json({ message: 'User already exists with this email.' });
         }
-      },
-
-
-      login: async (req, res) => {
-        try {
-          const { email, password } = req.body;
   
-          // Find the user by email
-          const user = await User.findOne({ email });
-          if (!user) {
-            return res.status(404).json({ message: 'User not found' });
-          }
-  
-          // Check the password
-          const validPassword = await bcrypt.compare(password, user.password);
-          if (!validPassword) {
-            return res.status(401).json({ message: 'Invalid password' });
-          }
-  
-          // Generate a JWT token
-          const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '1h' });
-        
-  
-          // Send the token in the response
-          res.json({ token, message: 'Login successful' });
-        } catch (error) {
-          console.error(error);
-          res.status(500).send('Internal Server Error');
+        // Check if the password is provided
+        if (!password) {
+          console.log('Password is missing!');
+          return res.status(400).json({ message: 'Password is required.' });
         }
-      },
+  
+        // Hash the password
+        console.log('Password before hashing:', password);
+        const hashedPassword = await bcrypt.hash(password, 10);
+        console.log('Password after hashing:', hashedPassword);
+  
+        // Create a new user in the database with email verification status set to false
+        const newUser = await User.create({
+          email,
+          password: hashedPassword,
+          isVerified: false, 
+          emailVerificationOTP: otpGenerator.generate(6, { upperCase: false, specialChars: false }),
+          fullName,
+        });
+  
+        // Send email verification OTP
+        await sendEmail(email, 'Email Verification OTP', `Your OTP is: ${newUser.emailVerificationOTP}`);
+  
+        res.status(201).json({ message: 'Signup successful. Check your email for verification.' });
+      } catch (error) {
+        console.error('Error during signup:', error);
+        res.status(500).json({ message: 'Internal Server Error during signup' });
+      }
+    },
+  
+    login: async (req, res) => {
+      try {
+        const { email, password } = req.body;
+  
+        // Find the user by email
+        const user = await User.findOne({ email });
+        if (!user) {
+          return res.status(404).json({ message: 'User not found' });
+        }
+  
+        // Check the password
+        const validPassword = await bcrypt.compare(password, user.password);
+        if (!validPassword) {
+          return res.status(401).json({ message: 'Invalid password' });
+        }
+  
+        // Check if the user is verified
+        if (!user.isVerified) {
+          return res.status(401).json({ message: 'User not verified. Please check your email for verification.' });
+        }
+  
+        // Generate a JWT token
+        const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '1h' });
+  
+        // Send the token in the response
+        res.json({ token, message: 'Login successful' });
+      } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal Server Error');
+      }
+    },
 
     forgotPassword: async (req, res) => {
       try {
