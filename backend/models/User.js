@@ -11,7 +11,7 @@ const userSchema = new mongoose.Schema({
     required: true,
   },
   fullName: {
-    type: String, // Add this line for the fullName field
+    type: String, 
     required: true,
   },
   isVerified: {
