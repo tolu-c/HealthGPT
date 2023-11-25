@@ -2,7 +2,6 @@ require('dotenv').config();
 const helmet = require('helmet');
 const express = require('express');
 const mongoose = require('mongoose');
-const bodyParser = require('body-parser');
 const authRoutes = require('./routes/auth');
 const cors = require('cors');
 const passport = require('passport');
@@ -25,7 +24,7 @@ mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true 
 const { WIT_AI_ACCESS_TOKEN, SESSION_SECRET } = process.env;
 
 // Middleware
-app.use(bodyParser.json());
+app.use(express.json());
 app.use(cors());
 
 // Using helmet middleware for secure headers

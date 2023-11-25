@@ -1,5 +1,5 @@
   const User = require('../models/User');
-  const nodemailer = require('nodemailer');
+  const sendEmail = require('../utils/sendEmail');
   const otpGenerator = require('otp-generator');
   const bcrypt = require('bcrypt');
   const jwt = require('jsonwebtoken');
@@ -44,74 +44,51 @@
     }
   }));
 
-
-
-  // Function to send an email
-  const sendEmail = async (to, subject, text) => {
-    try {
-      const transporter = nodemailer.createTransport({
-        service: 'gmail',
-        auth: {
-          user: process.env.GMAIL_USER,
-          pass: process.env.GMAIL_PASS,
-        },
-      });
-
-      const mailOptions = {
-        from: process.env.GMAIL_USER,
-        to,
-        subject,
-        text,
-      };
-
-      await transporter.sendMail(mailOptions);
-      console.log('Email sent successfully');
-    } catch (error) {
-      console.error('Error sending email:', error);
-      throw error;
-    }
-  };
-
   const authController = {
     signup: async (req, res) => {
-      try {
-        const { email, password } = req.body;
+        try {
     
-        // Check if the user already exists
-        const existingUser = await User.findOne({ email });
-        if (existingUser) {
-          return res.status(400).json({ message: 'User already exists with this email.' });
+          console.log('Received request body:', req.body);
+          const { email, password } = req.body;
+
+          console.log('Email:', email);
+          console.log('Password:', password);
+          
+    
+          // Check if the user already exists
+          const existingUser = await User.findOne({ email });
+          if (existingUser) {
+            return res.status(400).json({ message: 'User already exists with this email.' });
+          }
+              
+          // Check if the password is provided
+          if (!password) {
+            console.log('Password is missing!');
+            return res.status(400).json({ message: 'Password is required.' });
+          }
+                        
+          // Hash the password
+          console.log('Password before hashing:', password);
+          const hashedPassword = await bcrypt.hash(password, 10);
+          console.log('Password after hashing:', hashedPassword);
+    
+          // Create a new user in the database with email verification status set to false
+          const newUser = await User.create({
+            email,
+            password: hashedPassword,
+            isVerified: false, // Set to false initially
+            emailVerificationOTP: otpGenerator.generate(6, { upperCase: false, specialChars: false }),
+          });
+    
+          // Send email verification OTP
+          await sendEmail(email, 'Email Verification OTP', `Your OTP is: ${newUser.emailVerificationOTP}`);
+    
+          res.status(201).json({ message: 'Signup successful. Check your email for verification.' });
+        } catch (error) {
+          console.error('Error during signup:', error);
+          res.status(500).json({ message: 'Internal Server Error during signup' });
         }
-    
-        // Check if the password is provided and not an empty string
-        if (!password || password.trim() === '') {
-          console.log('Password is missing or empty!');
-          return res.status(400).json({ message: 'Password is required.' });
-        }
-    
-        // Hash the password
-        console.log('Password before hashing:', password);
-        const hashedPassword = await bcrypt.hash(password, 10);
-        console.log('Password after hashing:', hashedPassword);
-    
-        // Create a new user in the database with email verification status set to false
-        const newUser = await User.create({
-          email,
-          password: hashedPassword,
-          isVerified: false, // Set to false initially
-          emailVerificationOTP: otpGenerator.generate(6, { upperCase: false, specialChars: false }),
-        });
-    
-        // Send email verification OTP
-        await sendEmail(email, 'Email Verification OTP', `Your OTP is: ${newUser.emailVerificationOTP}`);
-    
-        res.status(201).json({ message: 'Signup successful. Check your email for verification.' });
-      } catch (error) {
-        console.error('Error during signup:', error);
-        res.status(500).json({ message: 'Internal Server Error during signup' });
-      }
-    },
-    
+      },
 
 
     login: async (req, res) => {
