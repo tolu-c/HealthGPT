@@ -83,23 +83,27 @@
           return res.status(400).json({ message: 'User already exists with this email.' });
         }
     
-      // Check if the password is provided and not an empty string
-      if (!password || password.trim() === '') {
-        console.log('Password is missing or empty!');
-        return res.status(400).json({ message: 'Password is required.' });
-      }
+        // Check if the password is provided and not an empty string
+        if (!password || password.trim() === '') {
+          console.log('Password is missing or empty!');
+          return res.status(400).json({ message: 'Password is required.' });
+        }
     
         // Hash the password
         console.log('Password before hashing:', password);
         const hashedPassword = await bcrypt.hash(password, 10);
         console.log('Password after hashing:', hashedPassword);
     
-        // Create a new user in the database
-        const newUser = await User.create({ email, password: hashedPassword });
+        // Create a new user in the database with email verification status set to false
+        const newUser = await User.create({
+          email,
+          password: hashedPassword,
+          isVerified: false, // Set to false initially
+          emailVerificationOTP: otpGenerator.generate(6, { upperCase: false, specialChars: false }),
+        });
     
         // Send email verification OTP
-        const emailVerificationOTP = otpGenerator.generate(6, { upperCase: false, specialChars: false });
-        await sendEmail(email, 'Email Verification OTP', `Your OTP is: ${emailVerificationOTP}`);
+        await sendEmail(email, 'Email Verification OTP', `Your OTP is: ${newUser.emailVerificationOTP}`);
     
         res.status(201).json({ message: 'Signup successful. Check your email for verification.' });
       } catch (error) {
@@ -107,6 +111,7 @@
         res.status(500).json({ message: 'Internal Server Error during signup' });
       }
     },
+    
 
 
     login: async (req, res) => {
