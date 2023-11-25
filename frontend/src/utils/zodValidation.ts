@@ -27,14 +27,14 @@ export const otpSchema = z.object({
 
 export const changePasswordSchema = z
   .object({
-    password: z
+    newPassword: z
       .string()
       .min(6, { message: "Password must be at least 6 characters" }),
     confirmPassword: z
       .string()
       .min(6, { message: "Password must be at least 6 characters" }),
   })
-  .refine((data) => data.password === data.confirmPassword, {
+  .refine((data) => data.newPassword === data.confirmPassword, {
     message: "Passwords do not match",
     path: ["confirmPassword"],
   });

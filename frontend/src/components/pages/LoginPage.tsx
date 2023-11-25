@@ -6,9 +6,9 @@ import { registerSchema } from "utils/zodValidation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ZodError, z } from "zod";
-import { useContext } from "react";
-import { AuthContext } from "store/AuthContext";
 import { AuthLayout } from "components/ui/AuthLayout";
+import { AxiosError } from "axios";
+import { useAuth } from "hooks/useAuth";
 
 type FormData = z.infer<typeof registerSchema>;
 
@@ -22,35 +22,28 @@ export const LoginPage = () => {
     resolver: zodResolver(registerSchema),
   });
   const navigate = useNavigate();
-  const { login } = useContext(AuthContext);
+  const { loginUser, status } = useAuth();
 
   const handleLogin = async ({ email, password }: FormData) => {
     try {
       const validDetails = registerSchema.parse({ email, password });
-      // todo => perform server action
-      // ? login example
-      login();
-      console.log(validDetails);
-      navigate("/chat/new");
+      // * login action
+      loginUser(validDetails);
     } catch (error) {
       if (error instanceof ZodError) {
-        setError(
-          "email",
-          {
-            message: error.message,
-          }
-          // { shouldFocus: true }
-        );
-        setError(
-          "password",
-          {
-            message: error.message,
-          }
-          // { shouldFocus: true }
-        );
-      } else {
-        setError("root", { message: "Something went wrong" });
+        setError("email", {
+          message: error.message,
+        });
+        setError("password", {
+          message: error.message,
+        });
       }
+      if (error instanceof AxiosError) {
+        console.log(error);
+        setError("root", { message: error.response?.data.message });
+      }
+
+      setError("root", { message: "Something went wrong" });
     }
   };
 
@@ -89,7 +82,9 @@ export const LoginPage = () => {
               I forgot my password
             </Link>
           </div>
-          <Button className="w-full">Sign Up</Button>
+          <Button className="w-full" isLoading={status === "fetching"}>
+            Log In
+          </Button>
           <p className="w-full text-center text-black-400 text-body-md">
             Don't have an account?{" "}
             <Link to={"/register"} className="text-brand-main hover:underline">
