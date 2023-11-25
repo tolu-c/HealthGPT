@@ -2,6 +2,7 @@ const express = require('express');
 const authController = require('../controllers/authController'); 
 const { Wit } = require('node-wit');
 const passport = require('passport');
+const extractUserId = require('../middleware/extractUserId');
 
 
 const router = express.Router();
@@ -14,6 +15,9 @@ router.post('/verify-email', authController.verifyEmail);
 router.post('/reset-password', authController.resetPassword);
 router.get('/logout', authController.logout);
 router.post('/chat', authController.chat);
+router.post('/resend-otp', authController.resendOTP);
+router.get('/user', extractUserId, authController.getUser);
+
 
 // New routes for Google authentication
 router.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));

@@ -91,33 +91,33 @@
       },
 
 
-    login: async (req, res) => {
-      try {
-        const { email, password } = req.body;
-
-        // Find the user by email
-        const user = await User.findOne({ email });
-        if (!user) {
-          return res.status(404).json({ message: 'User not found' });
+      login: async (req, res) => {
+        try {
+          const { email, password } = req.body;
+  
+          // Find the user by email
+          const user = await User.findOne({ email });
+          if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+          }
+  
+          // Check the password
+          const validPassword = await bcrypt.compare(password, user.password);
+          if (!validPassword) {
+            return res.status(401).json({ message: 'Invalid password' });
+          }
+  
+          // Generate a JWT token
+          const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '1h' });
+        
+  
+          // Send the token in the response
+          res.json({ token, message: 'Login successful' });
+        } catch (error) {
+          console.error(error);
+          res.status(500).send('Internal Server Error');
         }
-
-        // Check the password
-        const validPassword = await bcrypt.compare(password, user.password);
-        if (!validPassword) {
-          return res.status(401).json({ message: 'Invalid password' });
-        }
-
-        // Generate a JWT token
-        const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '1h' });
-      
-
-        // Send the token in the response
-        res.json({ token, message: 'Login successful' });
-      } catch (error) {
-        console.error(error);
-        res.status(500).send('Internal Server Error');
-      }
-    },
+      },
 
     forgotPassword: async (req, res) => {
       try {
@@ -184,13 +184,18 @@
       }
     },
 
-    logout: async(req, res) => {
+    logout: (req, res) => {
       try {
-        // For example, using Passport.js:
-        req.logout();
-    
-        // Redirect to the home page or any other page after logout
-        res.status(200).json({ message: 'Logout successful' });
+        // For Passport.js logout with a callback
+        req.logout((err) => {
+          if (err) {
+            console.error('Error during logout:', err);
+            res.status(500).json({ message: 'Internal Server Error' });
+          } else {
+            // Redirect to the home page or any other page after logout
+            res.status(200).json({ message: 'Logout successful' });
+          }
+        });
       } catch (error) {
         console.error('Error during logout:', error);
         res.status(500).json({ message: 'Internal Server Error' });
@@ -231,7 +236,55 @@
       }
 
     },
+    resendOTP: async (req, res) => {
+      try {
+        const { email } = req.body;
+  
+        // Find the user by email
+        const user = await User.findOne({ email });
+        if (!user) {
+          return res.status(404).json({ message: 'User not found' });
+        }
+  
+        // Generate a new OTP
+        const newOTP = otpGenerator.generate(6, { upperCase: false, specialChars: false });
+  
+        // Update the user's OTP in the database
+        user.emailVerificationOTP = newOTP;
+        await user.save();
+  
+        // Send the new OTP to the user's email
+        await sendEmail(email, 'Email Verification OTP', `Your new OTP is: ${newOTP}`);
+  
+        res.status(200).json({ message: 'New OTP sent successfully.' });
+      } catch (error) {
+        console.error('Error during OTP resend:', error);
+        res.status(500).json({ message: 'Internal Server Error during OTP resend' });
+      }
+    },
 
+    getUser: async (req, res) => {
+      try {
+        // Get the user ID from the decoded token
+        const userId = req.userId;
+  
+        // Find the user by ID
+        const user = await User.findById(userId);
+        if (!user) {
+          return res.status(404).json({ message: 'User not found' });
+        }
+  
+        // Return user details
+        res.status(200).json({
+          userId: user._id,
+          email: user.email,
+          
+        });
+      } catch (error) {
+        console.error('Error getting user details:', error);
+        res.status(500).json({ message: 'Internal Server Error getting user details' });
+      }
+    },
 
     chat: async (req, res) => {
       try {
