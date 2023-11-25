@@ -1,7 +1,8 @@
+import { getToken } from "api";
 import { Loader } from "components/ui/Loader";
-import { Fragment, Suspense, lazy, useContext } from "react";
+import { Fragment, Suspense, lazy, useEffect, useState } from "react";
 import { Route, Routes } from "react-router-dom";
-import { AuthContext } from "store/AuthContext";
+import { set } from "zod";
 
 // routes
 const Home = lazy(() => import("./routes/Home"));
@@ -18,7 +19,18 @@ const PasswordChangeSuccess = lazy(
 const VerificationSuccess = lazy(() => import("./routes/VerificationSuccess"));
 
 function App() {
-  const { isLoggedIn } = useContext(AuthContext);
+  const [isUser, setIsUser] = useState<boolean>(false);
+  const userHealthToken = getToken();
+
+  // TODO => fix user logging in
+  useEffect(() => {
+    if (userHealthToken) {
+      setIsUser(true);
+      console.log("token: ", userHealthToken);
+    } else {
+      setIsUser(false);
+    }
+  }, []);
 
   return (
     <Fragment>
@@ -38,7 +50,7 @@ function App() {
             path="verification-success"
             element={<VerificationSuccess />}
           />
-          <Route path="/*" element={isLoggedIn ? <LoggedIn /> : <Home />} />
+          <Route path="/*" element={isUser ? <LoggedIn /> : <Home />} />
         </Routes>
       </Suspense>
     </Fragment>

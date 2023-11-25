@@ -16,6 +16,7 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
   const logoutHandler = () => {
     setUserLoggedIn(false);
   };
+
   const authContextValue = {
     isLoggedIn: userLoggedIn,
     login: loginHandler,
