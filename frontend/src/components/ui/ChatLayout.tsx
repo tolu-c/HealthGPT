@@ -16,12 +16,12 @@ export const ChatLayout: FC<TChatLayout> = ({ children }) => {
   return (
     <div className="flex flex-col w-screen h-[100svh]">
       <NavBar title="New Chat" openSidebar={handleOpenSidebar} />
-      <main className="grow h-full overflow-y-scroll hide-scrollbar">
+      <main className="grow h-full overflow-y-scroll hide-scrollbar dark:bg-black-main">
         {children}
       </main>
-      <div className="w-full px-5 py-2 flex flex-col items-center flex-none">
+      <div className="w-full px-5 py-2 flex flex-col items-center flex-none bg-white-main dark:bg-black-main">
         <MessageInput />
-        <p className="font-lato text-black-500 text-[10px] leading-5 tracking-[0.25px] text-center">
+        <p className="font-lato text-black-500 dark:text-black-600 text-[10px] leading-5 tracking-[0.25px] text-center">
           HealthGPT is not perfect, please if symptoms persist, visit a medical
           specialist
         </p>

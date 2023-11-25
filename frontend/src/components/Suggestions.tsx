@@ -23,7 +23,7 @@ type TSuggestion = {
 
 export const Suggestion: FC<TSuggestion> = ({ title, description }) => {
   return (
-    <div className="flex w-full rounded-[10px] flex-col items-start gap-y-1.5 border border-white-500 p-2.5 font-lato cursor-pointer hover:bg-suggestion">
+    <div className="flex w-full rounded-[10px] flex-col items-start gap-y-1.5 border border-white-500 p-2.5 font-lato cursor-pointer hover:bg-suggestion dark:hover:bg-darkSuggestion">
       <h5 className="text-title-md text-black-400">{title}</h5>
       <p className="text-body-sm text-black-500">{description}</p>
     </div>

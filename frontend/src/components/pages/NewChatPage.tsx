@@ -10,7 +10,7 @@ export const NewChatPage = () => {
           alt="HealthGPT logo"
           className="w-[124px] h-[124px] object-center mx-auto"
         />
-        <p className="font-lato text-black-100 text-body-lg">
+        <p className="font-lato text-black-100 dark:text-black-600 text-body-lg">
           How are you feeling today?
         </p>
       </div>

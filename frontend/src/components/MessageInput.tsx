@@ -34,6 +34,7 @@ export const MessageInput = () => {
   const onSubmit = (data: FormData) => {
     handleSendQuestion(data);
   };
+
   return (
     <form
       className="w-full flex items-start gap-2"
