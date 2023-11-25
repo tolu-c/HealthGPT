@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 
 export type TChatHistory = {
   date: string;
@@ -42,17 +42,21 @@ export const ChatHistory = () => {
     <div className="w-full h-full overscroll-y-scroll hide-scrollbar flex flex-col gap-9 items-start px-2.5">
       {chatHistoryList.map((chat, index) => (
         <div key={index} className="flex flex-col w-full items-start gap-3">
-          <p className="px-3 text-body-sm text-black-500 font-lato">
+          <p className="px-3 text-body-sm text-black-500 dark:text-black-500 font-lato">
             {chat.date}
           </p>
           {chat.historyList.map((history) => (
-            <Link
+            <NavLink
               key={history.id}
               to={`/chat/${history.id}`}
-              className="font-lato py-2 px-3 w-full self-stretch text-black-300 text-body-md leading-6"
+              className={({ isActive }) =>
+                isActive
+                  ? "rounded-[10px] dark:bg-black-100 bg-white-300 w-full font-lato py-2 lg:py-2.5 px-3 self-stretch text-black-300 dark:text-white-200 text-body-md leading-6"
+                  : "font-lato py-2 lg:py-2.5 px-3 w-full self-stretch text-black-300 dark:text-white-200 text-body-md leading-6 hover:bg-white-300 dark:hover:bg-black-100 rounded-[10px]"
+              }
             >
               {history.name}
-            </Link>
+            </NavLink>
           ))}
         </div>
       ))}

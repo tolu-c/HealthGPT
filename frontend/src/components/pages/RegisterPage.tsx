@@ -80,7 +80,7 @@ export const RegisterPage = () => {
           <Button className="w-full">Sign Up</Button>
           <p className="w-full text-center text-black-400 text-body-md">
             Already have an account?{" "}
-            <Link to={"/login"} className="text-brand-main">
+            <Link to={"/login"} className="text-brand-main hover:underline">
               Login
             </Link>
           </p>

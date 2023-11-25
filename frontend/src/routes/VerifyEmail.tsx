@@ -1,5 +1,7 @@
+import { VerifyConfirmEmail } from "components/pages/VerifyConfirmEmail";
+
 const VerifyEmail = () => {
-  return <div>VerifyEmail</div>;
+  return <VerifyConfirmEmail action="verify" />;
 };
 
 export default VerifyEmail;
