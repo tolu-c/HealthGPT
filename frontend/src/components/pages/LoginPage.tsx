@@ -84,7 +84,7 @@ export const LoginPage = () => {
             />
             <Link
               to={"/forgot-password"}
-              className="text-body-sm text-brand-main font-lato -mt-3"
+              className="text-body-sm text-brand-main font-lato -mt-3 hover:underline"
             >
               I forgot my password
             </Link>
@@ -92,7 +92,7 @@ export const LoginPage = () => {
           <Button className="w-full">Sign Up</Button>
           <p className="w-full text-center text-black-400 text-body-md">
             Don't have an account?{" "}
-            <Link to={"/register"} className="text-brand-main">
+            <Link to={"/register"} className="text-brand-main hover:underline">
               Sign Up
             </Link>
           </p>

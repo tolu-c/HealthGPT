@@ -16,7 +16,7 @@ export const ChatLayout: FC<TChatLayout> = ({ children }) => {
   return (
     <div className="flex flex-col w-screen h-[100svh]">
       <NavBar title="New Chat" openSidebar={handleOpenSidebar} />
-      <main className="border grow h-full overflow-y-scroll border-black-main hide-scrollbar">
+      <main className="grow h-full overflow-y-scroll hide-scrollbar">
         {children}
       </main>
       <div className="w-full px-5 py-2 flex flex-col items-center flex-none">

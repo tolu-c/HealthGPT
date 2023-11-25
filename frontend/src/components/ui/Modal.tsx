@@ -11,8 +11,8 @@ type TModal = {
 
 export const Modal: FC<TModal> = ({ leftIcon, title, children, close }) => {
   const content: ReactNode = (
-    <div className="fixed w-screen h-screen bg-white-500/70 flex justify-center z-[9999] top-0 left-0">
-      <div className="p-3 pb-7 inline-flex justify-center items-center rounded-[10px] bg-white-main w-full h-max max-w-xs mt-16">
+    <div className="fixed w-screen h-screen bg-white-500/70 flex items-center justify-center z-[9999] top-0 left-0">
+      <div className="p-3 pb-7 inline-flex justify-center items-center rounded-[10px] bg-white-main w-full h-max max-w-xs">
         <div className="w-full flex flex-col gap-4 items-start relative">
           <div className="flex w-full items-center">
             {leftIcon && (
