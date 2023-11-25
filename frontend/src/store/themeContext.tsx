@@ -11,6 +11,9 @@ export const ThemeContextProvider = ({ children }: { children: ReactNode }) => {
   const [currentTheme, setCurrentTheme] = useState<TTheme>("light");
 
   const handleThemeToggle = () => {
+    const html = document.getElementsByTagName("html")[0] as HTMLElement;
+    html.classList.toggle("dark");
+
     if (currentTheme === "dark") {
       setCurrentTheme("light");
     } else if (currentTheme === "light") {

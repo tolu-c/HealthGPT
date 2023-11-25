@@ -1,6 +1,7 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: ["./src/**/*.{js,jsx,ts,tsx}"],
+  darkMode: "class",
   theme: {
     fontSize: {
       // body
@@ -166,6 +167,7 @@ module.exports = {
           error: "#FA1111",
         },
         suggestion: "rgba(0, 0, 0, 0.03)",
+        darkSuggestion: "rgba(255, 255, 255, 0.03)",
         comingSonn: "rgba(0, 255, 26, 0.10)",
       },
       boxShadow: {

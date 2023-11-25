@@ -3,7 +3,7 @@ import { FC, InputHTMLAttributes, ReactNode } from "react";
 import { cn } from "utils";
 
 const inputVariants = cva(
-  "w-full p-3 rounded-[10px] h-[46px] flex items-center border border-black-600 placeholder:text-black-500 placeholder:text-body-md font-lato focus:border-0 focus:ring-1 focus:ring-brand-400 focus:text-black-100 invalid:border-0 invalid:ring-1 invalid:ring-extra-error disabled:cursor-not-allowed disabled:border-black-600 disabled:text-black-600 text-black-100",
+  "w-full p-3 rounded-[10px] h-[46px] flex items-center border border-black-600 dark:bg-transparent placeholder:text-black-500 placeholder:text-body-md font-lato focus:border-0 focus:ring-1 focus:ring-brand-400 focus:text-black-100 invalid:border-0 invalid:ring-1 invalid:ring-extra-error disabled:cursor-not-allowed disabled:border-black-600 disabled:text-black-600 text-black-100",
   {
     variants: {
       state: {
