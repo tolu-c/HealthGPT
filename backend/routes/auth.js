@@ -3,6 +3,7 @@ const authController = require('../controllers/authController');
 const { Wit } = require('node-wit');
 const passport = require('passport');
 const extractUserId = require('../middleware/extractUserId');
+const checkTokenExpiration = require('../middleware/checkTokenExpiration');
 
 
 const router = express.Router();
@@ -27,6 +28,9 @@ router.get('/auth/google/callback', passport.authenticate('google', { failureRed
   // Redirect to the desired page after successful Google Sign-In
   res.redirect('/chat');
 });
+
+// Apply the checkTokenExpiration middleware to every route
+router.use(checkTokenExpiration);
 
 
 module.exports = router;
