@@ -1,4 +1,6 @@
   const User = require('../models/User');
+  const { Message } = require('../models/User');
+  const { Response } = require('../models/User');
   const sendEmail = require('../utils/sendEmail');
   const otpGenerator = require('otp-generator');
   const bcrypt = require('bcrypt');
@@ -20,7 +22,7 @@
       done(err, user);
     });
   });
-  
+
   passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
@@ -348,17 +350,17 @@
       try {
         const { messageId, newContent } = req.body;
         const userId = req.userId; 
-  
+    
         // Check if the user owns the message
         const userMessage = await Message.findOne({ _id: messageId, userId });
         if (!userMessage) {
           return res.status(403).json({ message: 'You are not authorized to edit this message' });
         }
-  
+    
         // Update the message content
         userMessage.content = newContent;
         await userMessage.save();
-  
+    
         res.status(200).json({ message: 'Message edited successfully' });
       } catch (error) {
         console.error('Error editing message:', error);

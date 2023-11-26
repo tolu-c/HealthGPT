@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const authController = require('../controllers/authController'); 
 
 // Message Model
 const messageSchema = new mongoose.Schema({
@@ -26,8 +27,7 @@ const responseSchema = new mongoose.Schema({
     required: true,
   },
   userId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
+    type: String,  
     required: true,
   },
   createdAt: {
@@ -37,6 +37,7 @@ const responseSchema = new mongoose.Schema({
 });
 
 const Response = mongoose.model('Response', responseSchema);
+
 
 // User Model
 const userSchema = new mongoose.Schema({
