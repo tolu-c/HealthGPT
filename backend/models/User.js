@@ -1,5 +1,44 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
+// Message Model
+const messageSchema = new mongoose.Schema({
+  content: {
+    type: String,
+    required: true,
+  },
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+});
+
+const Message = mongoose.model("Message", messageSchema);
+
+// Response Model
+const responseSchema = new mongoose.Schema({
+  content: {
+    type: String,
+    required: true,
+  },
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+});
+
+const Response = mongoose.model("Response", responseSchema);
+
+// User Model
 const userSchema = new mongoose.Schema({
   email: {
     type: String,
@@ -11,7 +50,7 @@ const userSchema = new mongoose.Schema({
     required: true,
   },
   fullName: {
-    type: String, 
+    type: String,
     required: true,
   },
   isVerified: {
@@ -28,6 +67,7 @@ const userSchema = new mongoose.Schema({
     type: String,
   },
 });
-const User = mongoose.model('User', userSchema);
 
-module.exports = User;
+const User = mongoose.model("User", userSchema);
+
+module.exports = { User, Message, Response };

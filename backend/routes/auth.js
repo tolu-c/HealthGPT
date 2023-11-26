@@ -16,6 +16,8 @@ router.post('/verify-email', authController.verifyEmail);
 router.post('/reset-password', authController.resetPassword);
 router.get('/logout', authController.logout);
 router.post('/chat', authController.chat);
+outer.get('/chat/history', authController.getChatHistory);
+router.patch('/chat/edit', authController.editMessage);
 router.post('/resend-otp', authController.resendOTP);
 router.get('/user', extractUserId, authController.getUser);
 

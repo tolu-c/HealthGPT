@@ -96,11 +96,9 @@ const authController = {
         `Your OTP is: ${newUser.emailVerificationOTP}`
       );
 
-      res
-        .status(201)
-        .json({
-          message: "Signup successful. Check your email for verification.",
-        });
+      res.status(201).json({
+        message: "Signup successful. Check your email for verification.",
+      });
     } catch (error) {
       console.error("Error during signup:", error);
       res.status(500).json({ message: "Internal Server Error during signup" });
@@ -125,12 +123,10 @@ const authController = {
 
       // Check if the user is verified
       if (!user.isVerified) {
-        return res
-          .status(401)
-          .json({
-            message:
-              "User not verified. Please check your email for verification.",
-          });
+        return res.status(401).json({
+          message:
+            "User not verified. Please check your email for verification.",
+        });
       }
 
       // Generate a JWT token
@@ -170,11 +166,9 @@ const authController = {
       const emailText = `Click on the following link to reset your password: ${resetLink}`;
       await sendEmail(email, "Password Reset", emailText);
 
-      res
-        .status(200)
-        .json({
-          message: "Password reset instructions sent. Check your email.",
-        });
+      res.status(200).json({
+        message: "Password reset instructions sent. Check your email.",
+      });
     } catch (error) {
       console.error(error);
       res.status(500).send("Internal Server Error");
@@ -330,44 +324,89 @@ const authController = {
   chat: async (req, res) => {
     try {
       const { message } = req.body;
+      const userId = req.userId;
 
-      console.log("Received message:", message);
+      // Save user's message to the database
+      const userMessage = await Message.create({
+        content: message,
+        userId,
+      });
 
       // Process the user's message using Wit.ai
       const witResponse = await witClient.message(message);
-      console.log("Wit.ai response:", witResponse);
 
-      // Extract relevant information from Wit.ai response
-      const intent =
-        witResponse.intents && witResponse.intents.length > 0
-          ? witResponse.intents[0].name
-          : "unknown";
-      const entities = witResponse.entities;
+      // Save AI response to the database
+      const aiResponse = await Response.create({
+        content: witResponse, // Adjust this based on Wit.ai response format
+        userId: "AI_BOT_USER_ID", // Assign a predefined user ID for AI responses
+      });
 
-      // Log the detected intent and entities
-      console.log("Detected Intent:", intent);
-      console.log("Detected Entities:", entities);
-
-      // Perform actions based on the detected intent and entities
-      let responseMessage = "I'm sorry, I didn't understand that.";
-
-      // Example: Handle a "health_issue" intent
-      if (
-        intent === "health_issue" &&
-        entities &&
-        entities["health_condition"] &&
-        entities["health_condition"].length > 0
-      ) {
-        const condition = entities["health_condition"][0].value;
-        // Perform logic to provide information or remedy for the health condition
-        responseMessage = `It seems you are concerned about ${condition}. Here is some information and advice...`;
-      }
-
-      // Send the response back to the user
-      res.status(200).json({ message: responseMessage });
+      // Return the IDs and content of both messages
+      res.status(200).json({
+        userMessage: {
+          id: userMessage._id,
+          content: userMessage.content,
+        },
+        aiResponse: {
+          id: aiResponse._id,
+          content: aiResponse.content,
+        },
+      });
     } catch (error) {
       console.error("Error during chat processing:", error);
       res.status(500).json({ message: "Internal Server Error" });
+    }
+  },
+
+  getChatHistory: async (req, res) => {
+    try {
+      const userId = req.userId;
+
+      // Retrieve the chat history for the logged-in user
+      const userMessages = await Message.find({ userId }).sort({
+        createdAt: "asc",
+      });
+      const aiResponses = await Response.find({
+        userId: "AI_BOT_USER_ID",
+      }).sort({ createdAt: "asc" });
+
+      // Combine and sort messages and responses based on createdAt
+      const chatHistory = [...userMessages, ...aiResponses].sort(
+        (a, b) => a.createdAt - b.createdAt
+      );
+
+      res.status(200).json({ chatHistory });
+    } catch (error) {
+      console.error("Error getting chat history:", error);
+      res
+        .status(500)
+        .json({ message: "Internal Server Error getting chat history" });
+    }
+  },
+
+  editMessage: async (req, res) => {
+    try {
+      const { messageId, newContent } = req.body;
+      const userId = req.userId;
+
+      // Check if the user owns the message
+      const userMessage = await Message.findOne({ _id: messageId, userId });
+      if (!userMessage) {
+        return res
+          .status(403)
+          .json({ message: "You are not authorized to edit this message" });
+      }
+
+      // Update the message content
+      userMessage.content = newContent;
+      await userMessage.save();
+
+      res.status(200).json({ message: "Message edited successfully" });
+    } catch (error) {
+      console.error("Error editing message:", error);
+      res
+        .status(500)
+        .json({ message: "Internal Server Error editing message" });
     }
   },
 };
