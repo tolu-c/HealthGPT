@@ -2,7 +2,7 @@ import { GoogleIcon } from "assets/svg/icons";
 import { Button } from "components/ui/form/Button";
 import { Input } from "components/ui/form/Input";
 import { Link, useNavigate } from "react-router-dom";
-import { registerSchema } from "utils/zodValidation";
+import { loginSchema } from "utils/zodValidation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ZodError, z } from "zod";
@@ -10,7 +10,7 @@ import { AuthLayout } from "components/ui/AuthLayout";
 import { AxiosError } from "axios";
 import { useAuth } from "hooks/useAuth";
 
-type FormData = z.infer<typeof registerSchema>;
+type FormData = z.infer<typeof loginSchema>;
 
 export const LoginPage = () => {
   const {
@@ -19,16 +19,18 @@ export const LoginPage = () => {
     setError,
     formState: { errors },
   } = useForm<FormData>({
-    resolver: zodResolver(registerSchema),
+    resolver: zodResolver(loginSchema),
   });
+  const { loginUser, status, error: AError } = useAuth();
   const navigate = useNavigate();
-  const { loginUser, status } = useAuth();
 
   const handleLogin = async ({ email, password }: FormData) => {
     try {
-      const validDetails = registerSchema.parse({ email, password });
+      const validDetails = loginSchema.parse({ email, password });
       // * login action
-      loginUser(validDetails);
+      await loginUser(validDetails).then(() => {
+        navigate("/chat/new");
+      });
     } catch (error) {
       if (error instanceof ZodError) {
         setError("email", {
@@ -40,10 +42,10 @@ export const LoginPage = () => {
       }
       if (error instanceof AxiosError) {
         console.log(error);
-        setError("root", { message: error.response?.data.message });
+        setError("root", { message: AError ? AError : "Something went wrong" });
       }
 
-      setError("root", { message: "Something went wrong" });
+      setError("root", { message: AError || "Something went wrong" });
     }
   };
 
@@ -91,6 +93,11 @@ export const LoginPage = () => {
               Sign Up
             </Link>
           </p>
+          {errors.root ? (
+            <span className="text-extra-error font-lato text-body-sm">
+              {errors.root.message}
+            </span>
+          ) : null}
         </form>
         {/* line */}
         <div className="w-full flex items-center justify-center relative">

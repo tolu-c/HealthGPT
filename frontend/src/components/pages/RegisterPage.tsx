@@ -9,9 +9,14 @@ import { ZodError, z } from "zod";
 import { AuthLayout } from "components/ui/AuthLayout";
 import { useAuth } from "hooks/useAuth";
 import { AxiosError } from "axios";
+import { FC } from "react";
 
 type FormData = z.infer<typeof registerSchema>;
-export const RegisterPage = () => {
+type TRegisterPage = {
+  onSaveEmail: (email: string) => void;
+};
+
+export const RegisterPage: FC<TRegisterPage> = ({ onSaveEmail }) => {
   const {
     register,
     handleSubmit,
@@ -20,20 +25,25 @@ export const RegisterPage = () => {
   } = useForm<FormData>({
     resolver: zodResolver(registerSchema),
   });
+
   const navigate = useNavigate();
   const { status, registerUser } = useAuth();
 
-  const handleRegister = async ({ email, password }: FormData) => {
+  const handleRegister = async ({ email, password, fullName }: FormData) => {
     try {
-      const validDetails = registerSchema.parse({ email, password });
+      const validDetails = registerSchema.parse({ email, password, fullName });
 
       // * register user action
       registerUser(validDetails).then(() => {
+        onSaveEmail(validDetails.email);
         navigate("/verify-email");
       });
     } catch (error) {
       if (error instanceof ZodError) {
         setError("email", {
+          message: error.message,
+        });
+        setError("fullName", {
           message: error.message,
         });
         setError("password", {
@@ -60,6 +70,14 @@ export const RegisterPage = () => {
           onSubmit={handleSubmit(onSubmit)}
         >
           <div className="w-full flex flex-col items-start gap-y-4">
+            <Input
+              type="text"
+              name="fullName"
+              register={register}
+              placeholder="Full Name"
+              // disabled
+              error={errors.fullName?.message}
+            />
             <Input
               type="email"
               name="email"

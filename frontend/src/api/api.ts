@@ -7,6 +7,8 @@ export const APIS = {
     forgotPassword: `${api}/forgot-password`,
     verifyEmail: `${api}/verify-email`,
     resetPassword: `${api}/reset-password`,
+    resendOtp: `${api}/resend-otp`,
+    logout: `${api}/logout`,
   },
   CHAT: {},
 };

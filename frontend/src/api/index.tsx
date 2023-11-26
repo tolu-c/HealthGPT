@@ -1,9 +1,5 @@
 import axios, { AxiosInstance } from "axios";
-
-export const getToken = () => {
-  let token = localStorage.getItem("userHealthToken") ?? null;
-  return token;
-};
+import { getToken } from "utils/token";
 
 let AxiosApi: AxiosInstance = axios.create({
   baseURL: process.env.REACT_APP_API,

@@ -12,15 +12,11 @@ import { useAuth } from "hooks/useAuth";
 import { AxiosError } from "axios";
 
 type TVerifyConfirmEmail = {
-  action: "verify" | "confirm";
   email: string;
 };
 
 type FormData = z.infer<typeof otpSchema>;
-export const VerifyConfirmEmail: FC<TVerifyConfirmEmail> = ({
-  action,
-  email,
-}) => {
+export const VerifyConfirmEmail: FC<TVerifyConfirmEmail> = ({ email }) => {
   const {
     register,
     handleSubmit,
@@ -28,22 +24,16 @@ export const VerifyConfirmEmail: FC<TVerifyConfirmEmail> = ({
     setError,
   } = useForm<FormData>({ resolver: zodResolver(otpSchema) });
   const navigate = useNavigate();
-  const { status, verifyUserEmail } = useAuth();
+  const { status, verifyUserEmail, resendUserOtp } = useAuth();
 
   const handleOtp = async ({ otp }: FormData) => {
     try {
       const validOtp = otpSchema.parse({ otp });
-      if (action === "confirm") {
-        // * verify email action
-        verifyUserEmail(validOtp.otp, email).then(() => {
-          navigate("/change-password");
-        });
-      } else if (action === "verify") {
-        // * verify email action
-        verifyUserEmail(validOtp.otp, email).then(() => {
-          navigate("/verification-success");
-        });
-      }
+
+      // * verify email action
+      verifyUserEmail(email, validOtp.otp).then(() => {
+        navigate("/verification-success");
+      });
     } catch (error) {
       if (error instanceof ZodError) {
         setError("otp", { message: error.message });
@@ -59,6 +49,7 @@ export const VerifyConfirmEmail: FC<TVerifyConfirmEmail> = ({
   const onSubmit = (data: FormData) => {
     handleOtp(data);
   };
+
   return (
     <AuthLayout title="Enter OTP">
       <div className="w-full flex flex-col gap-12">
@@ -83,7 +74,13 @@ export const VerifyConfirmEmail: FC<TVerifyConfirmEmail> = ({
             error={errors.otp?.message}
             inputMode="numeric"
           />
-          <Button type="button" disabled state={"text"} className="w-full">
+          <Button
+            type="button"
+            onClick={() => resendUserOtp(email)}
+            state={"text"}
+            disabled
+            className="w-full"
+          >
             Resend
           </Button>
           <Button

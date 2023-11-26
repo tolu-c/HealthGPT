@@ -1,4 +1,5 @@
 import { ReactNode, createContext, useState } from "react";
+import { getToken } from "utils/token";
 
 export const AuthContext = createContext({
   isLoggedIn: false,
@@ -8,9 +9,12 @@ export const AuthContext = createContext({
 
 export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
   const [userLoggedIn, setUserLoggedIn] = useState(false);
+  const userHealthToken = getToken();
 
   const loginHandler = () => {
-    setUserLoggedIn(true);
+    if (userHealthToken) {
+      setUserLoggedIn(true);
+    }
   };
 
   const logoutHandler = () => {
