@@ -1,4 +1,6 @@
 const User = require("../models/User");
+const { Message } = require("../models/User");
+const { Response } = require("../models/User");
 const sendEmail = require("../utils/sendEmail");
 const otpGenerator = require("otp-generator");
 const bcrypt = require("bcrypt");
