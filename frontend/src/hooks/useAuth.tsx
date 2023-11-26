@@ -9,6 +9,7 @@ import {
   resgitser,
   verifyEmail,
 } from "services/auth";
+// import { AuthContext } from "store/AuthContext";
 import type { TLogin, TRegister, TStatus } from "types";
 import { removeToken } from "utils/token";
 
@@ -16,6 +17,7 @@ export const useAuth = () => {
   const [status, setStatus] = useState<TStatus>("idle");
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+  // const { login: ALogin, logout: ALogout } = useContext(AuthContext);
 
   const registerUser = async ({ email, password, fullName }: TRegister) => {
     return new Promise((resolve) => {
@@ -64,7 +66,7 @@ export const useAuth = () => {
           resolve(res);
           // ? show notifcation
           setStatus("success");
-          navigate("/chat/new");
+          // ALogin();
         })
         .catch((error) => {
           // ? show error notifcation => console.log(error.response.data.message);
@@ -146,6 +148,7 @@ export const useAuth = () => {
         .then((res) => {
           resolve(res);
           removeToken();
+          // ALogout();
           navigate("/");
           // ? show notifcation
           setStatus("success");

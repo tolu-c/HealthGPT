@@ -1,7 +1,7 @@
 import { GoogleIcon } from "assets/svg/icons";
 import { Button } from "components/ui/form/Button";
 import { Input } from "components/ui/form/Input";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { loginSchema } from "utils/zodValidation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -22,12 +22,15 @@ export const LoginPage = () => {
     resolver: zodResolver(loginSchema),
   });
   const { loginUser, status, error: AError } = useAuth();
+  const navigate = useNavigate();
 
   const handleLogin = async ({ email, password }: FormData) => {
     try {
       const validDetails = loginSchema.parse({ email, password });
       // * login action
-      loginUser(validDetails);
+      await loginUser(validDetails).then(() => {
+        navigate("/chat/new");
+      });
     } catch (error) {
       if (error instanceof ZodError) {
         setError("email", {

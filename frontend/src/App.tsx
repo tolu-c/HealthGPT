@@ -11,7 +11,7 @@ const LoggedIn = lazy(() => import("./routes/LoggedIn"));
 const VerifyEmail = lazy(() => import("./routes/VerifyEmail"));
 const ForgotPassword = lazy(() => import("./routes/ForgotPassword"));
 const ChangePassword = lazy(() => import("./routes/ChangePassword"));
-const ConfirmEmail = lazy(() => import("./routes/ConfirmEmail"));
+// const ConfirmEmail = lazy(() => import("./routes/ConfirmEmail"));
 const PasswordChangeSuccess = lazy(
   () => import("./routes/PasswordChangeSuccess")
 );
@@ -20,6 +20,7 @@ const ResetPassword = lazy(() => import("./routes/ResetPassword"));
 
 function App() {
   const [userEmail, setUserEmail] = useState<string>("");
+  const [isLoggedIn, setLoggedIn] = useState<boolean>(false);
   const userHealthToken = getToken();
 
   // TODO => fix user logging in
@@ -27,6 +28,12 @@ function App() {
   const receiveUserEmail = (email: string) => {
     setUserEmail(email);
   };
+
+  useEffect(() => {
+    if (userHealthToken) {
+      setLoggedIn(true);
+    }
+  }, [userHealthToken, isLoggedIn]);
 
   return (
     <Fragment>
@@ -53,10 +60,7 @@ function App() {
             path="verification-success"
             element={<VerificationSuccess />}
           />
-          <Route
-            path="/*"
-            element={userHealthToken ? <LoggedIn /> : <Home />}
-          />
+          <Route path="/*" element={isLoggedIn ? <LoggedIn /> : <Home />} />
         </Routes>
       </Suspense>
     </Fragment>
