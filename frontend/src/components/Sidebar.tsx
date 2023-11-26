@@ -13,21 +13,23 @@ import { FC, ReactNode, useContext, useState } from "react";
 import { createPortal } from "react-dom";
 import { ThemeContext } from "store/themeContext";
 import profile from "assets/images/profile.png";
-import { AuthContext } from "store/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { ChatHistory } from "./ChatHistory";
 import { Modal } from "./ui/Modal";
+import { useAuth } from "hooks/useAuth";
 
 type TSidebar = {
   closeSidebar: () => void;
 };
 
 export const Sidebar: FC<TSidebar> = ({ closeSidebar }) => {
-  const { theme, toggleTheme } = useContext(ThemeContext);
-  const { logout } = useContext(AuthContext);
-  const navigate = useNavigate();
   const [openConfirmationModal, setOpenConfirmationModal] =
     useState<boolean>(false);
+
+  // theme context
+  const { theme, toggleTheme } = useContext(ThemeContext);
+  const navigate = useNavigate();
+  const { logoutUser } = useAuth();
 
   const newChat = () => navigate("/chat/new");
   const closeModal = () => setOpenConfirmationModal(false);
@@ -128,7 +130,7 @@ export const Sidebar: FC<TSidebar> = ({ closeSidebar }) => {
                 </button>
                 <button
                   className="w-full border border-extra-error rounded-[10px] h-[38px] flex items-center justify-center font-lato text-body-sm text-extra-error hover:shadow-pressedOutline active:shadow-pressedOutline"
-                  onClick={logout}
+                  onClick={logoutUser}
                 >
                   Logout
                 </button>

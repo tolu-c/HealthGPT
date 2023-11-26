@@ -2,15 +2,15 @@ import { GoogleIcon } from "assets/svg/icons";
 import { Button } from "components/ui/form/Button";
 import { Input } from "components/ui/form/Input";
 import { Link, useNavigate } from "react-router-dom";
-import { registerSchema } from "utils/zodValidation";
+import { loginSchema } from "utils/zodValidation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ZodError, z } from "zod";
-import { useContext } from "react";
-import { AuthContext } from "store/AuthContext";
 import { AuthLayout } from "components/ui/AuthLayout";
+import { AxiosError } from "axios";
+import { useAuth } from "hooks/useAuth";
 
-type FormData = z.infer<typeof registerSchema>;
+type FormData = z.infer<typeof loginSchema>;
 
 export const LoginPage = () => {
   const {
@@ -19,38 +19,33 @@ export const LoginPage = () => {
     setError,
     formState: { errors },
   } = useForm<FormData>({
-    resolver: zodResolver(registerSchema),
+    resolver: zodResolver(loginSchema),
   });
+  const { loginUser, status, error: AError } = useAuth();
   const navigate = useNavigate();
-  const { login } = useContext(AuthContext);
 
   const handleLogin = async ({ email, password }: FormData) => {
     try {
-      const validDetails = registerSchema.parse({ email, password });
-      // todo => perform server action
-      // ? login example
-      login();
-      console.log(validDetails);
-      navigate("/chat/new");
+      const validDetails = loginSchema.parse({ email, password });
+      // * login action
+      await loginUser(validDetails).then(() => {
+        navigate("/chat/new");
+      });
     } catch (error) {
       if (error instanceof ZodError) {
-        setError(
-          "email",
-          {
-            message: error.message,
-          }
-          // { shouldFocus: true }
-        );
-        setError(
-          "password",
-          {
-            message: error.message,
-          }
-          // { shouldFocus: true }
-        );
-      } else {
-        setError("root", { message: "Something went wrong" });
+        setError("email", {
+          message: error.message,
+        });
+        setError("password", {
+          message: error.message,
+        });
       }
+      if (error instanceof AxiosError) {
+        console.log(error);
+        setError("root", { message: AError ? AError : "Something went wrong" });
+      }
+
+      setError("root", { message: AError || "Something went wrong" });
     }
   };
 
@@ -89,13 +84,20 @@ export const LoginPage = () => {
               I forgot my password
             </Link>
           </div>
-          <Button className="w-full">Sign Up</Button>
+          <Button className="w-full" isLoading={status === "fetching"}>
+            Log In
+          </Button>
           <p className="w-full text-center text-black-400 text-body-md">
             Don't have an account?{" "}
             <Link to={"/register"} className="text-brand-main hover:underline">
               Sign Up
             </Link>
           </p>
+          {errors.root ? (
+            <span className="text-extra-error font-lato text-body-sm">
+              {errors.root.message}
+            </span>
+          ) : null}
         </form>
         {/* line */}
         <div className="w-full flex items-center justify-center relative">

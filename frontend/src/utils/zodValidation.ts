@@ -1,6 +1,19 @@
 import { z } from "zod";
 
 export const registerSchema = z.object({
+  fullName: z
+    .string()
+    .min(3, { message: "Full name must be at least 3 characters" }),
+  email: z
+    .string()
+    .email("Must be a valid email")
+    .min(1, { message: "Email is required" }),
+  password: z
+    .string()
+    .min(6, { message: "Password must be 6 characters long" }),
+});
+
+export const loginSchema = z.object({
   email: z
     .string()
     .email("Must be a valid email")
@@ -27,14 +40,14 @@ export const otpSchema = z.object({
 
 export const changePasswordSchema = z
   .object({
-    password: z
+    newPassword: z
       .string()
       .min(6, { message: "Password must be at least 6 characters" }),
     confirmPassword: z
       .string()
       .min(6, { message: "Password must be at least 6 characters" }),
   })
-  .refine((data) => data.password === data.confirmPassword, {
+  .refine((data) => data.newPassword === data.confirmPassword, {
     message: "Passwords do not match",
     path: ["confirmPassword"],
   });

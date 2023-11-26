@@ -7,9 +7,16 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ZodError, z } from "zod";
 import { AuthLayout } from "components/ui/AuthLayout";
+import { useAuth } from "hooks/useAuth";
+import { AxiosError } from "axios";
+import { FC } from "react";
 
 type FormData = z.infer<typeof registerSchema>;
-export const RegisterPage = () => {
+type TRegisterPage = {
+  onSaveEmail: (email: string) => void;
+};
+
+export const RegisterPage: FC<TRegisterPage> = ({ onSaveEmail }) => {
   const {
     register,
     handleSubmit,
@@ -18,33 +25,36 @@ export const RegisterPage = () => {
   } = useForm<FormData>({
     resolver: zodResolver(registerSchema),
   });
-  const navigate = useNavigate();
 
-  const handleRegister = async ({ email, password }: FormData) => {
+  const navigate = useNavigate();
+  const { status, registerUser } = useAuth();
+
+  const handleRegister = async ({ email, password, fullName }: FormData) => {
     try {
-      const validDetails = registerSchema.parse({ email, password });
-      // todo => perform server action
-      console.log(validDetails);
-      navigate("/verify-email");
+      const validDetails = registerSchema.parse({ email, password, fullName });
+
+      // * register user action
+      registerUser(validDetails).then(() => {
+        onSaveEmail(validDetails.email);
+        navigate("/verify-email");
+      });
     } catch (error) {
       if (error instanceof ZodError) {
-        setError(
-          "email",
-          {
-            message: error.message,
-          }
-          // { shouldFocus: true }
-        );
-        setError(
-          "password",
-          {
-            message: error.message,
-          }
-          // { shouldFocus: true }
-        );
-      } else {
-        setError("root", { message: "Something went wrong" });
+        setError("email", {
+          message: error.message,
+        });
+        setError("fullName", {
+          message: error.message,
+        });
+        setError("password", {
+          message: error.message,
+        });
       }
+      if (error instanceof AxiosError) {
+        setError("root", { message: error.response?.data.message });
+      }
+
+      setError("root", { message: "Something went wrong" });
     }
   };
 
@@ -60,6 +70,14 @@ export const RegisterPage = () => {
           onSubmit={handleSubmit(onSubmit)}
         >
           <div className="w-full flex flex-col items-start gap-y-4">
+            <Input
+              type="text"
+              name="fullName"
+              register={register}
+              placeholder="Full Name"
+              // disabled
+              error={errors.fullName?.message}
+            />
             <Input
               type="email"
               name="email"
@@ -77,7 +95,10 @@ export const RegisterPage = () => {
               error={errors.password?.message}
             />
           </div>
-          <Button className="w-full">Sign Up</Button>
+          {errors.root ? <span>{errors.root.message}</span> : null}
+          <Button className="w-full" isLoading={status === "fetching"}>
+            Sign Up
+          </Button>
           <p className="w-full text-center text-black-400 text-body-md">
             Already have an account?{" "}
             <Link to={"/login"} className="text-brand-main hover:underline">

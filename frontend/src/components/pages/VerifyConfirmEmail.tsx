@@ -8,13 +8,15 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "components/ui/form/Input";
 import { Button } from "components/ui/form/Button";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "hooks/useAuth";
+import { AxiosError } from "axios";
 
 type TVerifyConfirmEmail = {
-  action: "verify" | "confirm";
+  email: string;
 };
 
 type FormData = z.infer<typeof otpSchema>;
-export const VerifyConfirmEmail: FC<TVerifyConfirmEmail> = ({ action }) => {
+export const VerifyConfirmEmail: FC<TVerifyConfirmEmail> = ({ email }) => {
   const {
     register,
     handleSubmit,
@@ -22,32 +24,32 @@ export const VerifyConfirmEmail: FC<TVerifyConfirmEmail> = ({ action }) => {
     setError,
   } = useForm<FormData>({ resolver: zodResolver(otpSchema) });
   const navigate = useNavigate();
+  const { status, verifyUserEmail, resendUserOtp } = useAuth();
 
   const handleOtp = async ({ otp }: FormData) => {
     try {
       const validOtp = otpSchema.parse({ otp });
-      if (action === "confirm") {
-        // todo => confirm action
-        console.log("confirm email");
-        navigate("/change-password");
-      } else if (action === "verify") {
-        // todo => verify action
-        console.log("verify email");
+
+      // * verify email action
+      verifyUserEmail(email, validOtp.otp).then(() => {
         navigate("/verification-success");
-      }
-      console.log(validOtp);
+      });
     } catch (error) {
       if (error instanceof ZodError) {
         setError("otp", { message: error.message });
-      } else {
-        setError("root", { message: "Something went wrong" });
       }
+      if (error instanceof AxiosError) {
+        setError("root", { message: error.response?.data.message });
+      }
+
+      setError("root", { message: "Something went wrong" });
     }
   };
 
   const onSubmit = (data: FormData) => {
     handleOtp(data);
   };
+
   return (
     <AuthLayout title="Enter OTP">
       <div className="w-full flex flex-col gap-12">
@@ -58,7 +60,7 @@ export const VerifyConfirmEmail: FC<TVerifyConfirmEmail> = ({ action }) => {
             className="w-max h-auto object-contain object-center"
           />
           <p className="font-lato text-center w-full text-black-300 text-body-lg">
-            Please enter the 6 digit code sent to example@gmail.com to verify
+            Please enter the 6 digit code sent to {email} to verify
           </p>
         </div>
         <form
@@ -72,10 +74,20 @@ export const VerifyConfirmEmail: FC<TVerifyConfirmEmail> = ({ action }) => {
             error={errors.otp?.message}
             inputMode="numeric"
           />
-          <Button type="button" disabled state={"text"} className="w-full">
+          <Button
+            type="button"
+            onClick={() => resendUserOtp(email)}
+            state={"text"}
+            disabled
+            className="w-full"
+          >
             Resend
           </Button>
-          <Button type="submit" className="w-full -mt-4">
+          <Button
+            type="submit"
+            className="w-full -mt-4"
+            isLoading={status === "fetching"}
+          >
             Submit
           </Button>
         </form>

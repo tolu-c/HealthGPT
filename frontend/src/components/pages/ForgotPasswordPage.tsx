@@ -7,6 +7,8 @@ import { useNavigate } from "react-router-dom";
 import { emailSchema } from "utils/zodValidation";
 import { ZodError, z } from "zod";
 import forgot_password from "assets/svg/forgot-password.svg";
+import { useAuth } from "hooks/useAuth";
+import { AxiosError } from "axios";
 
 type FormData = z.infer<typeof emailSchema>;
 export const ForgotPasswordPage = () => {
@@ -19,26 +21,31 @@ export const ForgotPasswordPage = () => {
     resolver: zodResolver(emailSchema),
   });
   const navigate = useNavigate();
+  const { forgotUserPassword, status } = useAuth();
 
   const handlelverifyEmail = async ({ email }: FormData) => {
     try {
       const validEmail = emailSchema.parse({ email });
-      // todo => check email consists
-      // todo => send email otp
-      console.log(validEmail);
-      navigate("/confirm-email");
+      // * forgot user password action
+      forgotUserPassword(validEmail.email).then(() => {
+        navigate("/reset-password");
+      });
     } catch (error) {
       if (error instanceof ZodError) {
         setError("email", { message: error.message });
-      } else {
-        setError("root", { message: "Something went wrong" });
       }
+      if (error instanceof AxiosError) {
+        setError("root", { message: error.response?.data.message });
+      }
+
+      setError("root", { message: "Something went wrong" });
     }
   };
 
   const onSubmit = (data: FormData) => {
     handlelverifyEmail(data);
   };
+
   return (
     <AuthLayout title="Password Reset">
       <div className="w-full flex flex-col gap-y-16 items-center">
@@ -67,7 +74,9 @@ export const ForgotPasswordPage = () => {
             // disabled
             error={errors.email?.message}
           />
-          <Button className="w-full">Send OTP</Button>
+          <Button className="w-full" isLoading={status === "fetching"}>
+            Send Reset Link
+          </Button>
         </form>
       </div>
     </AuthLayout>

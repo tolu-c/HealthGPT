@@ -7,9 +7,16 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router-dom";
 import { Input } from "components/ui/form/Input";
 import { Button } from "components/ui/form/Button";
+import { FC } from "react";
+import { useAuth } from "hooks/useAuth";
 
 type FormData = z.infer<typeof changePasswordSchema>;
-export const ChangePasswordPage = () => {
+type TChangePassword = {
+  token: string;
+};
+export const ChangePasswordPage: FC<TChangePassword> = ({ token }) => {
+  // console.log(token);
+
   const {
     register,
     handleSubmit,
@@ -19,21 +26,28 @@ export const ChangePasswordPage = () => {
     resolver: zodResolver(changePasswordSchema),
   });
   const navigate = useNavigate();
+  const { resetUserPassword, status } = useAuth();
 
   const handleChangePassword = async ({
-    password,
+    newPassword,
     confirmPassword,
   }: FormData) => {
     try {
       const validPasswords = changePasswordSchema.parse({
-        password,
+        newPassword,
         confirmPassword,
       });
-      console.log(validPasswords);
-      navigate("/password-change-success");
+      // console.log(validPasswords);
+      resetUserPassword(
+        token,
+        validPasswords.confirmPassword,
+        validPasswords.newPassword
+      ).then(() => {
+        navigate("/password-change-success");
+      });
     } catch (error) {
       if (error instanceof ZodError) {
-        setError("password", { message: error.message });
+        setError("newPassword", { message: error.message });
         setError("confirmPassword", { message: error.message });
       } else {
         setError("root", { message: "Something went wrong" });
@@ -61,10 +75,10 @@ export const ChangePasswordPage = () => {
         >
           <Input
             register={register}
-            name="password"
+            name="newPassword"
             placeholder="Enter password"
             type="password"
-            error={errors.password?.message}
+            error={errors.newPassword?.message}
           />
           <Input
             register={register}
@@ -73,7 +87,9 @@ export const ChangePasswordPage = () => {
             type="password"
             error={errors.confirmPassword?.message}
           />
-          <Button className="w-full">Save</Button>
+          <Button className="w-full" isLoading={status === "fetching"}>
+            Save
+          </Button>
         </form>
       </div>
     </AuthLayout>
