@@ -28,9 +28,8 @@ export const ForgotPasswordPage = () => {
       const validEmail = emailSchema.parse({ email });
       // * forgot user password action
       forgotUserPassword(validEmail.email).then(() => {
-        navigate("/confirm-email");
+        navigate("/reset-password");
       });
-      // console.log(validEmail);
     } catch (error) {
       if (error instanceof ZodError) {
         setError("email", { message: error.message });
@@ -46,6 +45,7 @@ export const ForgotPasswordPage = () => {
   const onSubmit = (data: FormData) => {
     handlelverifyEmail(data);
   };
+
   return (
     <AuthLayout title="Password Reset">
       <div className="w-full flex flex-col gap-y-16 items-center">
@@ -75,7 +75,7 @@ export const ForgotPasswordPage = () => {
             error={errors.email?.message}
           />
           <Button className="w-full" isLoading={status === "fetching"}>
-            Send OTP
+            Send Reset Link
           </Button>
         </form>
       </div>

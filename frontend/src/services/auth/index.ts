@@ -1,13 +1,15 @@
 import AxiosApi from "api";
 import { APIS } from "api/api";
-import type { TEmailPassword } from "types";
+import type { TLogin, TRegister } from "types";
 
-export const resgitser = async ({ email, password }: TEmailPassword) => {
-  return AxiosApi.post(`${APIS.AUTH.regsiter}`, { email, password }).then(
-    (res) => {
-      return res.data;
-    }
-  );
+export const resgitser = async ({ email, password, fullName }: TRegister) => {
+  return AxiosApi.post(`${APIS.AUTH.regsiter}`, {
+    email,
+    password,
+    fullName,
+  }).then((res) => {
+    return res.data;
+  });
 };
 
 export const verifyEmail = async (email: string, otp: string) => {
@@ -18,7 +20,7 @@ export const verifyEmail = async (email: string, otp: string) => {
   );
 };
 
-export const login = async ({ email, password }: TEmailPassword) => {
+export const login = async ({ email, password }: TLogin) => {
   return await AxiosApi.post(`${APIS.AUTH.login}`, { email, password }).then(
     (res) => {
       if (res?.data.token) {
@@ -47,6 +49,20 @@ export const resetPassword = async (
     newPassword,
     confirmPassword,
   }).then((res) => {
+    return res.data;
+  });
+};
+
+export const resendOtp = async (email: string) => {
+  return await AxiosApi.post(`${APIS.AUTH.resendOtp}`, { email }).then(
+    (res) => {
+      return res.data;
+    }
+  );
+};
+
+export const logout = async () => {
+  return await AxiosApi.get(`${APIS.AUTH.logout}`).then((res) => {
     return res.data;
   });
 };

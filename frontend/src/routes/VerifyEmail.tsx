@@ -1,9 +1,7 @@
 import { VerifyConfirmEmail } from "components/pages/VerifyConfirmEmail";
 
-const VerifyEmail = () => {
-  return (
-    <VerifyConfirmEmail action="verify" email="webdevtolu@protonmail.com" />
-  );
+const VerifyEmail = ({ email }: { email: string }) => {
+  return <VerifyConfirmEmail email={email} />;
 };
 
 export default VerifyEmail;

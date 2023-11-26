@@ -3,21 +3,25 @@ import { useNavigate } from "react-router-dom";
 import {
   forgotPassword,
   login,
+  logout,
+  resendOtp,
   resetPassword,
   resgitser,
   verifyEmail,
 } from "services/auth";
-import type { TEmailPassword, TStatus } from "types";
+import type { TLogin, TRegister, TStatus } from "types";
+import { removeToken } from "utils/token";
 
 export const useAuth = () => {
   const [status, setStatus] = useState<TStatus>("idle");
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  const registerUser = async ({ email, password }: TEmailPassword) => {
+  const registerUser = async ({ email, password, fullName }: TRegister) => {
     return new Promise((resolve) => {
       setStatus("fetching");
 
-      resgitser({ email, password })
+      resgitser({ email, password, fullName })
         .then((res) => {
           resolve(res);
           // ? show notifcation
@@ -51,7 +55,7 @@ export const useAuth = () => {
     });
   };
 
-  const loginUser = async ({ email, password }: TEmailPassword) => {
+  const loginUser = async ({ email, password }: TLogin) => {
     return new Promise((resolve) => {
       setStatus("fetching");
 
@@ -65,6 +69,7 @@ export const useAuth = () => {
         .catch((error) => {
           // ? show error notifcation => console.log(error.response.data.message);
           console.log(error.response.data.message);
+          setError(error.response.data.message);
           setStatus("error");
         })
         .finally(() => setStatus("idle"));
@@ -112,12 +117,57 @@ export const useAuth = () => {
         .finally(() => setStatus("idle"));
     });
   };
+
+  const resendUserOtp = async (email: string) => {
+    return new Promise((resolve) => {
+      setStatus("fetching");
+
+      resendOtp(email)
+        .then((res) => {
+          resolve(res);
+          // ? show notifcation
+          setStatus("success");
+        })
+        .catch((error) => {
+          // ? show error notifcation => console.log(error.response.data.message);
+          console.log(error.response.data.message);
+          setError(error.response.data.message);
+          setStatus("error");
+        })
+        .finally(() => setStatus("idle"));
+    });
+  };
+
+  const logoutUser = async () => {
+    return new Promise((resolve) => {
+      setStatus("fetching");
+
+      logout()
+        .then((res) => {
+          resolve(res);
+          removeToken();
+          navigate("/");
+          // ? show notifcation
+          setStatus("success");
+        })
+        .catch((error) => {
+          // ? show error notifcation => console.log(error.response.data.message);
+          console.log(error.response.data.message);
+          setStatus("error");
+        })
+        .finally(() => setStatus("idle"));
+    });
+  };
+
   return {
     registerUser,
     verifyUserEmail,
     loginUser,
     forgotUserPassword,
     resetUserPassword,
+    resendUserOtp,
+    logoutUser,
     status,
+    error,
   };
 };
