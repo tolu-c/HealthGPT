@@ -347,7 +347,7 @@ const authController = {
         "https://api.openai.com/v1/engines/davinci-codex/completions",
         {
           prompt: `${message}\n${healthPrompt}`,
-          max_tokens: 100,
+          max_tokens: 1000,
           n: 1,
         },
         {
