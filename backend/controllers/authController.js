@@ -300,37 +300,41 @@
         // The user ID is already attached to the request by the extractUserId middleware
         const userId = req.userId;
         const { message } = req.body;
-    
+  
         // Save user's message to the database
         const userMessage = await Message.create({
           content: message,
           userId,
         });
-    
-        // Send user's message to OpenAI for processing
+  
+        // Create a health-related prompt for OpenAI
+        const healthPrompt = 'Discuss common health issues, their symptoms, and preventive measures.';
+  
+        // Send user's message and health-related prompt to OpenAI for processing
         const openAIResponse = await axios.post(
           'https://api.openai.com/v1/engines/davinci-codex/completions',
           {
-            prompt: message,
-            max_tokens: 100, // Adjust based on your preferences
-            n: 1, // Number of completions
+            prompt: `${message}\n${healthPrompt}`, 
+            max_tokens: 100, 
+            n: 1,
           },
           {
             headers: {
               'Content-Type': 'application/json',
               Authorization: `Bearer ${openaiApiKey}`,
-              'User-Token': req.header('x-auth-token'), 
+              'User-Token': req.header('x-auth-token'),
             },
           }
         );
-    
+  
         const aiResponse = openAIResponse.data.choices[0]?.text || 'No Response';
-    
+  
+        // Save AI response to the database
         const aiMessage = await Response.create({
           content: aiResponse,
           userId: aiBotUserId,
         });
-    
+  
         // Return the IDs and content of both messages
         res.status(200).json({
           userMessage: {
@@ -347,6 +351,7 @@
         res.status(500).json({ message: 'Internal Server Error' });
       }
     },
+  
 
     getChatHistory: async (req, res) => {
       try {
