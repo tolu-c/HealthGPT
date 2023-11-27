@@ -7,6 +7,7 @@ import reportWebVitals from "./reportWebVitals";
 import { BrowserRouter as Router } from "react-router-dom";
 import { AuthContextProvider } from "store/AuthContext";
 import { ThemeContextProvider } from "store/themeContext";
+import { UserContextProvider } from "store/userContext";
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
@@ -15,9 +16,11 @@ root.render(
   <React.StrictMode>
     <Router>
       <AuthContextProvider>
-        <ThemeContextProvider>
-          <App />
-        </ThemeContextProvider>
+        <UserContextProvider>
+          <ThemeContextProvider>
+            <App />
+          </ThemeContextProvider>
+        </UserContextProvider>
       </AuthContextProvider>
     </Router>
   </React.StrictMode>

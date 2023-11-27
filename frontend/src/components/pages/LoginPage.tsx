@@ -9,6 +9,7 @@ import { ZodError, z } from "zod";
 import { AuthLayout } from "components/ui/AuthLayout";
 import { AxiosError } from "axios";
 import { useAuth } from "hooks/useAuth";
+const api = process.env.REACT_APP_API;
 
 type FormData = z.infer<typeof loginSchema>;
 
@@ -21,7 +22,12 @@ export const LoginPage = () => {
   } = useForm<FormData>({
     resolver: zodResolver(loginSchema),
   });
-  const { loginUser, status, error: AError } = useAuth();
+  const {
+    loginUser,
+    status,
+    error: AError,
+    continueUserWithGoogle,
+  } = useAuth();
   const navigate = useNavigate();
 
   const handleLogin = async ({ email, password }: FormData) => {
@@ -107,7 +113,17 @@ export const LoginPage = () => {
           </span>
         </div>
         <div className="w-full flex flex-col items-center gap-4">
-          <Button state={"secondary"} className="w-full">
+          <Link
+            to={`${api}/auth/google`}
+            className="text-brand-main hover:underline"
+          >
+            google
+          </Link>
+          <Button
+            state={"secondary"}
+            className="w-full"
+            onClick={continueUserWithGoogle}
+          >
             <GoogleIcon />
             Continue with Google
           </Button>

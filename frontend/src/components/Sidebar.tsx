@@ -17,6 +17,7 @@ import { useNavigate } from "react-router-dom";
 import { ChatHistory } from "./ChatHistory";
 import { Modal } from "./ui/Modal";
 import { useAuth } from "hooks/useAuth";
+import { UserContext } from "store/userContext";
 
 type TSidebar = {
   closeSidebar: () => void;
@@ -28,6 +29,8 @@ export const Sidebar: FC<TSidebar> = ({ closeSidebar }) => {
 
   // theme context
   const { theme, toggleTheme } = useContext(ThemeContext);
+  // user context
+  const { user } = useContext(UserContext);
   const navigate = useNavigate();
   const { logoutUser } = useAuth();
 
@@ -54,7 +57,7 @@ export const Sidebar: FC<TSidebar> = ({ closeSidebar }) => {
               className="h-10 w-10 rounded-full object-cover object-center"
             />
             <p className="font-lato text-black-200 dark:text-black-600 text-body-sm">
-              Giwa Abdullahi
+              {user.fullName ? user.fullName : "Your name"}
             </p>
           </div>
           <span

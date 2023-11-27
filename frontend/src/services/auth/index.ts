@@ -66,3 +66,10 @@ export const logout = async () => {
     return res.data;
   });
 };
+
+export const continueWithGoogle = async () => {
+  return await AxiosApi.get(`${APIS.AUTH.google}`).then((res) => {
+    console.log(`auth service: ${res}`);
+    return res.data;
+  });
+};
