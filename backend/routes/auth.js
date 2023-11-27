@@ -20,6 +20,7 @@ router.get('/chat/history', authController.getChatHistory);
 router.patch('/chat/edit', authController.editMessage);
 router.post('/resend-otp', authController.resendOTP);
 router.get('/user', extractUserId, authController.getUser);
+router.get('/users/:userId', authController.getUser);
 
 
 // New routes for Google authentication

@@ -1,5 +1,4 @@
-const User = require("../models/User");
-const { Message } = require("../models/User");
+const { Message, User } = require("../models/User");
 const { Response } = require("../models/User");
 const sendEmail = require("../utils/sendEmail");
 const otpGenerator = require("otp-generator");
@@ -54,7 +53,10 @@ const authController = {
   signup: async (req, res) => {
     try {
       console.log("Received request body:", req.body);
-      const { email, password, fullName } = req.body;
+      // const { email, password, fullName } = req.body;
+      const email = req.body.email;
+      const password = req.body.password;
+      const fullName = req.body.fullName;
 
       console.log("Email:", email);
       console.log("Password:", password);
@@ -98,9 +100,11 @@ const authController = {
         `Your OTP is: ${newUser.emailVerificationOTP}`
       );
 
-      res.status(201).json({
-        message: "Signup successful. Check your email for verification.",
-      });
+      res
+        .status(201)
+        .json({
+          message: "Signup successful. Check your email for verification.",
+        });
     } catch (error) {
       console.error("Error during signup:", error);
       res.status(500).json({ message: "Internal Server Error during signup" });
@@ -125,15 +129,17 @@ const authController = {
 
       // Check if the user is verified
       if (!user.isVerified) {
-        return res.status(401).json({
-          message:
-            "User not verified. Please check your email for verification.",
-        });
+        return res
+          .status(401)
+          .json({
+            message:
+              "User not verified. Please check your email for verification.",
+          });
       }
 
-      // Generate a JWT token
+      // Generate a JWT token with expiration time set to 1 day
       const token = jwt.sign({ userId: user._id }, JWT_SECRET, {
-        expiresIn: "1h",
+        expiresIn: "1d",
       });
 
       // Send the token in the response
@@ -164,7 +170,7 @@ const authController = {
       await user.save();
 
       // Send the password reset email with the token link
-      const resetLink = `http://localhost:3000/change-password?token=${passwordResetToken}`;
+      const resetLink = `https://health-gpt-blush.vercel.app/change-password?token${passwordResetToken}`;
       const emailText = `Click on the following link to reset your password: ${resetLink}`;
       await sendEmail(email, "Password Reset", emailText);
 
@@ -301,8 +307,8 @@ const authController = {
 
   getUser: async (req, res) => {
     try {
-      // Get the user ID from the decoded token
-      const userId = req.userId;
+      // Get the user ID from the request parameter
+      const userId = req.params.userId;
 
       // Find the user by ID
       const user = await User.findById(userId);
@@ -312,7 +318,7 @@ const authController = {
 
       // Return user details
       res.status(200).json({
-        userId: user._id,
+        fullname: user.fullName,
         email: user.email,
       });
     } catch (error) {
@@ -334,13 +340,29 @@ const authController = {
         userId,
       });
 
-      // Process the user's message using Wit.ai
-      const witResponse = await witClient.message(message);
+      // Send user's message to OpenAI for processing
+      const openAIResponse = await axios.post(
+        "https://api.openai.com/v1/engines/davinci-codex/completions",
+        {
+          prompt: message,
+          max_tokens: 100, // Adjust based on your preferences
+          n: 1, // Number of completions
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer YOUR_OPENAI_API_KEY",
+          },
+        }
+      );
+
+      const aiResponse =
+        openAIResponse.data.choices[0]?.text || "No response from OpenAI";
 
       // Save AI response to the database
-      const aiResponse = await Response.create({
-        content: witResponse, // Adjust this based on Wit.ai response format
-        userId: "AI_BOT_USER_ID", // Assign a predefined user ID for AI responses
+      const aiMessage = await Message.create({
+        content: aiResponse,
+        userId: "AI_BOT_USER_ID",
       });
 
       // Return the IDs and content of both messages
@@ -350,8 +372,8 @@ const authController = {
           content: userMessage.content,
         },
         aiResponse: {
-          id: aiResponse._id,
-          content: aiResponse.content,
+          id: aiMessage._id,
+          content: aiMessage.content,
         },
       });
     } catch (error) {
