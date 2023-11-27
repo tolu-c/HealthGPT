@@ -15,9 +15,12 @@ router.post('/forgot-password', authController.forgotPassword);
 router.post('/verify-email', authController.verifyEmail);
 router.post('/reset-password', authController.resetPassword);
 router.get('/logout', authController.logout);
-router.post('/chat', authController.chat);
+router.post('/chat', extractUserId, authController.chat);
+router.get('/chat/history', authController.getChatHistory);
+router.patch('/chat/edit', authController.editMessage);
 router.post('/resend-otp', authController.resendOTP);
 router.get('/user', extractUserId, authController.getUser);
+router.get('/users/:userId', authController.getUser);
 
 
 // New routes for Google authentication
