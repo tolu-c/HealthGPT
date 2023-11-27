@@ -1,5 +1,5 @@
-  const User = require('../models/User');
-  const { Message } = require('../models/User');
+
+  const { Message, User } = require('../models/User');
   const { Response } = require('../models/User');
   const sendEmail = require('../utils/sendEmail');
   const otpGenerator = require('otp-generator');
@@ -50,7 +50,11 @@
     signup: async (req, res) => {
       try {
         console.log('Received request body:', req.body);
-        const { email, password, fullName } = req.body;
+        // const { email, password, fullName } = req.body;
+        const email = req.body.email;
+        const password = req.body.password
+        const fullName = req.body.fullName
+
   
         console.log('Email:', email);
         console.log('Password:', password);
@@ -95,27 +99,27 @@
     login: async (req, res) => {
       try {
         const { email, password } = req.body;
-  
+    
         // Find the user by email
         const user = await User.findOne({ email });
         if (!user) {
           return res.status(404).json({ message: 'User not found' });
         }
-  
+    
         // Check the password
         const validPassword = await bcrypt.compare(password, user.password);
         if (!validPassword) {
           return res.status(401).json({ message: 'Invalid password' });
         }
-  
+    
         // Check if the user is verified
         if (!user.isVerified) {
           return res.status(401).json({ message: 'User not verified. Please check your email for verification.' });
         }
-  
-        // Generate a JWT token
-        const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '1h' });
-  
+    
+        // Generate a JWT token with expiration time set to 1 day
+        const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '1d' });
+    
         // Send the token in the response
         res.json({ token, message: 'Login successful' });
       } catch (error) {
@@ -144,7 +148,7 @@
         await user.save();
 
         // Send the password reset email with the token link
-        const resetLink = `http://your-frontend-url/reset-password?token=${passwordResetToken}`;
+        const resetLink = `https://health-gpt-blush.vercel.app/change-password?token${passwordResetToken}`;
         const emailText = `Click on the following link to reset your password: ${resetLink}`;
         await sendEmail(email, 'Password Reset', emailText);
 
@@ -270,31 +274,31 @@
 
     getUser: async (req, res) => {
       try {
-        // Get the user ID from the decoded token
-        const userId = req.userId;
-  
+        // Get the user ID from the request parameter
+        const userId = req.params.userId; 
+        
         // Find the user by ID
         const user = await User.findById(userId);
         if (!user) {
           return res.status(404).json({ message: 'User not found' });
         }
-  
+    
         // Return user details
         res.status(200).json({
-          userId: user._id,
+          fullname: user.fullName, 
           email: user.email,
-          
         });
       } catch (error) {
         console.error('Error getting user details:', error);
         res.status(500).json({ message: 'Internal Server Error getting user details' });
       }
+    
     },
 
     chat: async (req, res) => {
       try {
         const { message } = req.body;
-        const userId = req.userId; 
+        const userId = req.userId;
   
         // Save user's message to the database
         const userMessage = await Message.create({
@@ -302,13 +306,24 @@
           userId,
         });
   
-        // Process the user's message using Wit.ai
-        const witResponse = await witClient.message(message);
+        // Send user's message to OpenAI for processing
+        const openAIResponse = await axios.post('https://api.openai.com/v1/engines/davinci-codex/completions', {
+          prompt: message,
+          max_tokens: 100,  // Adjust based on your preferences
+          n: 1,  // Number of completions
+        }, {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer YOUR_OPENAI_API_KEY',
+          },
+        });
+  
+        const aiResponse = openAIResponse.data.choices[0]?.text || 'No response from OpenAI';
   
         // Save AI response to the database
-        const aiResponse = await Response.create({
-          content: witResponse, // Adjust this based on Wit.ai response format
-          userId: 'AI_BOT_USER_ID', // Assign a predefined user ID for AI responses
+        const aiMessage = await Message.create({
+          content: aiResponse,
+          userId: 'AI_BOT_USER_ID',
         });
   
         // Return the IDs and content of both messages
@@ -318,8 +333,8 @@
             content: userMessage.content,
           },
           aiResponse: {
-            id: aiResponse._id,
-            content: aiResponse.content,
+            id: aiMessage._id,
+            content: aiMessage.content,
           },
         });
       } catch (error) {
@@ -327,7 +342,7 @@
         res.status(500).json({ message: 'Internal Server Error' });
       }
     },
-  
+
     getChatHistory: async (req, res) => {
       try {
         const userId = req.userId; 

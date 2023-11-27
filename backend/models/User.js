@@ -21,13 +21,15 @@ const messageSchema = new mongoose.Schema({
 const Message = mongoose.model('Message', messageSchema);
 
 // Response Model
+// Response Model
 const responseSchema = new mongoose.Schema({
   content: {
     type: String,
     required: true,
   },
   userId: {
-    type: String,  
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
     required: true,
   },
   createdAt: {
@@ -37,6 +39,7 @@ const responseSchema = new mongoose.Schema({
 });
 
 const Response = mongoose.model('Response', responseSchema);
+
 
 
 // User Model
