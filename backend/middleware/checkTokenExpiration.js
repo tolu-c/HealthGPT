@@ -14,12 +14,15 @@ module.exports = (req, res, next) => {
         console.error('Token verification failed:', err);
         req.logout(); // Perform logout
       } else {
-        // Check if the token is expired after 2 minutes
-        const expirationTime = decoded.exp * 1000; // Convert seconds to milliseconds
-        const currentTime = Date.now();
 
-        if (currentTime > expirationTime + 120000) {
-          console.error('Token expired after 2 minutes.');
+      
+        const currentTime = Date.now(); // Current time in milliseconds
+        const expirationTime = decoded.exp * 1000; // Convert seconds to milliseconds
+        
+        const oneDayInMilliseconds = 24 * 60 * 60 * 1000; // One day in milliseconds
+        
+        if (currentTime > expirationTime + oneDayInMilliseconds) {
+          console.error('Token expired after one day.');
           req.logout(); // Perform logout
         }
       }

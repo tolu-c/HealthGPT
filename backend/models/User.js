@@ -8,8 +8,7 @@ const messageSchema = new mongoose.Schema({
     required: true,
   },
   userId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
+    type: mongoose.Schema.Types.Mixed,
     required: true,
   },
   createdAt: {
@@ -21,15 +20,13 @@ const messageSchema = new mongoose.Schema({
 const Message = mongoose.model("Message", messageSchema);
 
 // Response Model
-// Response Model
 const responseSchema = new mongoose.Schema({
   content: {
     type: String,
     required: true,
   },
   userId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
+    type: mongoose.Schema.Types.Mixed,
     required: true,
   },
   createdAt: {
