@@ -100,11 +100,9 @@ const authController = {
         `Your OTP is: ${newUser.emailVerificationOTP}`
       );
 
-      res
-        .status(201)
-        .json({
-          message: "Signup successful. Check your email for verification.",
-        });
+      res.status(201).json({
+        message: "Signup successful. Check your email for verification.",
+      });
     } catch (error) {
       console.error("Error during signup:", error);
       res.status(500).json({ message: "Internal Server Error during signup" });
@@ -129,12 +127,10 @@ const authController = {
 
       // Check if the user is verified
       if (!user.isVerified) {
-        return res
-          .status(401)
-          .json({
-            message:
-              "User not verified. Please check your email for verification.",
-          });
+        return res.status(401).json({
+          message:
+            "User not verified. Please check your email for verification.",
+        });
       }
 
       // Generate a JWT token with expiration time set to 1 day
@@ -329,58 +325,53 @@ const authController = {
     }
   },
 
-  chat: async (req, res) => {
-    try {
-      const { message } = req.body;
-      const userId = req.userId;
+  // chat: async (req, res) => {
+  //   try {
+  //     const { message } = req.body;
+  //     const userId = req.userId;
 
-      // Save user's message to the database
-      const userMessage = await Message.create({
-        content: message,
-        userId,
-      });
+  //     // Save user's message to the database
+  //     const userMessage = await Message.create({
+  //       content: message,
+  //       userId,
+  //     });
 
-      // Send user's message to OpenAI for processing
-      const openAIResponse = await axios.post(
-        "https://api.openai.com/v1/engines/davinci-codex/completions",
-        {
-          prompt: message,
-          max_tokens: 100, // Adjust based on your preferences
-          n: 1, // Number of completions
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer YOUR_OPENAI_API_KEY",
-          },
-        }
-      );
+  //     // Send user's message to OpenAI for processing
+  //     const openAIResponse = await axios.post('https://api.openai.com/v1/engines/davinci-codex/completions', {
+  //       prompt: message,
+  //       max_tokens: 100,  // Adjust based on your preferences
+  //       n: 1,  // Number of completions
+  //     }, {
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //         'Authorization': 'Bearer YOUR_OPENAI_API_KEY',
+  //       },
+  //     });
 
-      const aiResponse =
-        openAIResponse.data.choices[0]?.text || "No response from OpenAI";
+  //     const aiResponse = openAIResponse.data.choices[0]?.text || 'No response from OpenAI';
 
-      // Save AI response to the database
-      const aiMessage = await Message.create({
-        content: aiResponse,
-        userId: "AI_BOT_USER_ID",
-      });
+  //     // Save AI response to the database
+  //     const aiMessage = await Message.create({
+  //       content: aiResponse,
+  //       userId: 'AI_BOT_USER_ID',
+  //     });
 
-      // Return the IDs and content of both messages
-      res.status(200).json({
-        userMessage: {
-          id: userMessage._id,
-          content: userMessage.content,
-        },
-        aiResponse: {
-          id: aiMessage._id,
-          content: aiMessage.content,
-        },
-      });
-    } catch (error) {
-      console.error("Error during chat processing:", error);
-      res.status(500).json({ message: "Internal Server Error" });
-    }
-  },
+  //     // Return the IDs and content of both messages
+  //     res.status(200).json({
+  //       userMessage: {
+  //         id: userMessage._id,
+  //         content: userMessage.content,
+  //       },
+  //       aiResponse: {
+  //         id: aiMessage._id,
+  //         content: aiMessage.content,
+  //       },
+  //     });
+  //   } catch (error) {
+  //     console.error('Error during chat processing:', error);
+  //     res.status(500).json({ message: 'Internal Server Error' });
+  //   }
+  // },
 
   getChatHistory: async (req, res) => {
     try {
