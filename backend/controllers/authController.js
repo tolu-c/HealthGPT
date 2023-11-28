@@ -29,24 +29,54 @@
     callbackURL: process.env.GOOGLE_CALLBACK_URL,
   }, async (accessToken, refreshToken, profile, done) => {
     try {
+      // Check if the user already exists in your database by their Google ID
       const existingUser = await User.findOne({ googleId: profile.id });
-
+  
       if (existingUser) {
+        // If the user exists, return the user
         return done(null, existingUser);
       }
-
+  
+      // If the user doesn't exist, create a new user in your database
       const newUser = await User.create({
         googleId: profile.id,
         email: profile.emails[0].value,
       });
-
+  
+      // Return the newly created user
       return done(null, newUser);
     } catch (error) {
+      // Handle any errors that occur during the process
       return done(error, null);
     }
   }));
-
-  const authController = {
+    async function getOpenAIResponse(prompt) {
+      try {
+        const openaiApiKey = 'process.env.OPENAI_API_KEY'; 
+        const apiUrl = 'https://api.openai.com/v1/engines/davinci-codex/completions';
+    
+        const response = await axios.post(
+          apiUrl,
+          {
+            prompt,
+            max_tokens: 1000,
+            n: 1,
+          },
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${openaiApiKey}`,
+            },
+          }
+        );
+    
+        return response.data.choices[0]?.text || 'No Response';
+      } catch (error) {
+        console.error('Error making API request to OpenAI:', error);
+        return 'Error';
+      }
+    }
+    const authController = {
     signup: async (req, res) => {
       try {
         console.log('Received request body:', req.body);
@@ -297,7 +327,6 @@
 
     chat: async (req, res) => {
       try {
-        // The user ID is already attached to the request by the extractUserId middleware
         const userId = req.userId;
         const { message } = req.body;
   
@@ -310,24 +339,11 @@
         // Create a health-related prompt for OpenAI
         const healthPrompt = 'Discuss common health issues, their symptoms, and preventive measures.';
   
-        // Send user's message and health-related prompt to OpenAI for processing
-        const openAIResponse = await axios.post(
-          'https://api.openai.com/v1/engines/davinci-codex/completions',
-          {
-            prompt: `${message}\n${healthPrompt}`, 
-            max_tokens: 1000, 
-            n: 1,
-          },
-          {
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${openaiApiKey}`,
-              'User-Token': req.header('x-auth-token'),
-            },
-          }
-        );
+        // Use a specific identifier for AI bot's user ID
+        const aiBotUserId = 'AI_BOT_USER_ID';
   
-        const aiResponse = openAIResponse.data.choices[0]?.text || 'No Response';
+        // Get AI response from OpenAI
+        const aiResponse = await getOpenAIResponse(`${message}\n${healthPrompt}`);
   
         // Save AI response to the database
         const aiMessage = await Response.create({
@@ -351,8 +367,7 @@
         res.status(500).json({ message: 'Internal Server Error' });
       }
     },
-  
-
+    
     getChatHistory: async (req, res) => {
       try {
         const userId = req.userId; 
