@@ -12,12 +12,12 @@ import {
 import { FC, ReactNode, useContext, useState } from "react";
 import { createPortal } from "react-dom";
 import { ThemeContext } from "store/themeContext";
-import profile from "assets/images/profile.png";
 import { useNavigate } from "react-router-dom";
 import { ChatHistory } from "./ChatHistory";
 import { Modal } from "./ui/Modal";
 import { useAuth } from "hooks/useAuth";
-import { UserContext } from "store/userContext";
+import { TUser } from "store/userContext";
+import { getUser } from "utils/token";
 
 type TSidebar = {
   closeSidebar: () => void;
@@ -29,14 +29,14 @@ export const Sidebar: FC<TSidebar> = ({ closeSidebar }) => {
 
   // theme context
   const { theme, toggleTheme } = useContext(ThemeContext);
-  // user context
-  const { user } = useContext(UserContext);
   const navigate = useNavigate();
   const { logoutUser } = useAuth();
 
   const newChat = () => navigate("/chat/new");
   const closeModal = () => setOpenConfirmationModal(false);
   const openModal = () => setOpenConfirmationModal(true);
+
+  const user: TUser = getUser();
 
   const content: ReactNode = (
     <div className="fixed top-0 left-0 h-[100svh] max-h-[100lvh] w-screen bg-white-500/70 dark:bg-black-500/70">
@@ -51,13 +51,11 @@ export const Sidebar: FC<TSidebar> = ({ closeSidebar }) => {
         {/* profile */}
         <div className="w-full flex items-center justify-between px-3 py-5 flex-none">
           <div className="flex w-max items-center gap-2">
-            <img
-              src={profile}
-              alt="user.name"
-              className="h-10 w-10 rounded-full object-cover object-center"
-            />
+            <span className="capitalize w-10 h-10 flex items-center justify-center rounded-full bg-brand-main text-white-main font-lato text-body-md">
+              {user.fullname[0]}
+            </span>
             <p className="font-lato text-black-200 dark:text-black-600 text-body-sm">
-              {user.fullName ? user.fullName : "Your name"}
+              {user.fullname}
             </p>
           </div>
           <span

@@ -6,17 +6,17 @@ import {
   useState,
 } from "react";
 
-type TUser = {
-  userId: string;
+export type TUser = {
+  // userId: string;
   email: string;
-  fullName?: string;
+  fullname: string;
 };
 type TUserContextType = {
   user: TUser;
   setUser: Dispatch<SetStateAction<TUser>>;
 };
 const initialUser: TUser = {
-  userId: "",
+  fullname: "",
   email: "",
 };
 const dummySetUser: Dispatch<SetStateAction<TUser>> = () => {};

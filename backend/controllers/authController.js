@@ -305,7 +305,7 @@ const authController = {
   getUser: async (req, res) => {
     try {
       // Get the user ID from the request parameter
-      const userId = req.params.userId;
+      const userId = req.userId;
 
       // Find the user by ID
       const user = await User.findById(userId);

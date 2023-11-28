@@ -36,6 +36,7 @@ export const LoginPage = () => {
       // * login action
       await loginUser(validDetails).then(() => {
         navigate("/chat/new");
+        // redirect("/chat/new");
       });
     } catch (error) {
       if (error instanceof ZodError) {

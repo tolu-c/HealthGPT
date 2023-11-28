@@ -61,8 +61,8 @@ export const resendOtp = async (email: string) => {
   );
 };
 
-export const logout = async () => {
-  return await AxiosApi.get(`${APIS.AUTH.logout}`).then((res) => {
+export const logout = () => {
+  return AxiosApi.get(`${APIS.AUTH.logout}`).then((res) => {
     return res.data;
   });
 };

@@ -65,8 +65,9 @@ export const useAuth = () => {
 
       login({ email, password })
         .then((res) => {
-          // resolve(res);
           getLoggedInUser(res.token).then((res2) => {
+            localStorage.setItem("healthUser", JSON.stringify(res2));
+            // console.log(res2);
             resolve(res2);
             // ? show notifcation
             setStatus("success");
