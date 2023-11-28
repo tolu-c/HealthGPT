@@ -16,7 +16,7 @@ export const NavBar: FC<TNavBar> = ({ title, openSidebar }) => {
     <div className="inline-flex flex-col px-5 py-3 w-full gap-y-5 items-center bg-white-main dark:bg-black-main justify-end border-b border-white-400 dark:border-black-400 shadow-nav">
       <div className="flex w-full items-center justify-between">
         <span
-          className="w-8 h-8 p-2 flex items-center justify-center"
+          className="w-8 h-8 p-2 flex items-center justify-center lg:hidden"
           onClick={openSidebar}
         >
           <Bars3BottomLeftIcon className="h-5 w-5 text-black-300 dark:text-white-400 cursor-pointer" />

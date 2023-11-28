@@ -3,7 +3,7 @@ import { Suggestions } from "components/Suggestions";
 
 export const NewChatPage = () => {
   return (
-    <div className="w-full h-full flex flex-col items-center justify-between">
+    <div className="w-full lg:max-w-4xl lg:mx-auto h-full flex flex-col items-center justify-between">
       <div className="finline-lex flex-col w-max mt-9 gap-y-3 items-center">
         <img
           src={logo}
