@@ -133,6 +133,7 @@ module.exports = {
       },
       backgroundImage: {
         iconButton: "linear-gradient(145deg, #000E89 33.13%, #001AFF 88.61%)",
+        home: "url('assets/images/homepage-lg.png')",
       },
       colors: {
         brand: {

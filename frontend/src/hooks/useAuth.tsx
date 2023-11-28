@@ -33,6 +33,7 @@ export const useAuth = () => {
         })
         .catch((error) => {
           // ? show error notifcation => console.log(error.response.data.message);
+          setError(error.response.data.message);
           console.log(error.response.data.message);
           setStatus("error");
         })
