@@ -1,3 +1,4 @@
+import { ChatLayout } from "components/ui/ChatLayout";
 import { FC } from "react";
 
 type TChatPage = {
@@ -5,5 +6,5 @@ type TChatPage = {
 };
 
 export const ChatPage: FC<TChatPage> = ({ chatID }) => {
-  return <div>chat for {chatID}</div>;
+  return <ChatLayout>chat for {chatID}</ChatLayout>;
 };

@@ -22,7 +22,10 @@ export const ChatLayout: FC<TChatLayout> = ({ children }) => {
           className="hidden lg:block absolute top-0 left-0 cursor-pointer"
           onClick={handleOpenSidebar}
         >
-          <ChevronDoubleRightIcon className="w-5 h-5 text-black-100 dark:text-white-400" />
+          <ChevronDoubleRightIcon
+            className="w-5 h-5 text-black-100 dark:text-white-400"
+            title="Open Sidebar"
+          />
         </span>
         {children}
       </main>

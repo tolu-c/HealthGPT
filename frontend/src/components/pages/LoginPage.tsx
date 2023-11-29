@@ -29,10 +29,7 @@ export const LoginPage = () => {
     try {
       const validDetails = loginSchema.parse({ email, password });
       // * login action
-      await loginUser(validDetails).then(() => {
-        navigate("/chat/new");
-        // redirect("/chat/new");
-      });
+      loginUser(validDetails);
     } catch (error) {
       if (error instanceof ZodError) {
         setError("email", {
