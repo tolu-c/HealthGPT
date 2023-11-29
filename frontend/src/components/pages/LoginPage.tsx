@@ -9,6 +9,7 @@ import { ZodError, z } from "zod";
 import { AuthLayout } from "components/ui/AuthLayout";
 import { AxiosError } from "axios";
 import { useAuth } from "hooks/useAuth";
+const api = process.env.REACT_APP_API;
 
 type FormData = z.infer<typeof loginSchema>;
 
@@ -21,16 +22,14 @@ export const LoginPage = () => {
   } = useForm<FormData>({
     resolver: zodResolver(loginSchema),
   });
-  const { loginUser, status, error: AError } = useAuth();
+  const { loginUser, status } = useAuth();
   const navigate = useNavigate();
 
   const handleLogin = async ({ email, password }: FormData) => {
     try {
       const validDetails = loginSchema.parse({ email, password });
       // * login action
-      await loginUser(validDetails).then(() => {
-        navigate("/chat/new");
-      });
+      loginUser(validDetails);
     } catch (error) {
       if (error instanceof ZodError) {
         setError("email", {
@@ -40,12 +39,8 @@ export const LoginPage = () => {
           message: error.message,
         });
       }
-      if (error instanceof AxiosError) {
-        console.log(error);
-        setError("root", { message: AError ? AError : "Something went wrong" });
-      }
 
-      setError("root", { message: AError || "Something went wrong" });
+      setError("root", { message: "Something went wrong" });
     }
   };
 
@@ -100,17 +95,27 @@ export const LoginPage = () => {
           ) : null}
         </form>
         {/* line */}
-        <div className="w-full flex items-center justify-center relative">
+        {/* <div className="w-full flex items-center justify-center relative">
           <span className="grow h-[1px] w-full bg-black-600"></span>
           <span className="text-black-500 text-sm font-medium leading-5 absolute left-1/2 -translate-x-1/2 z-30 bg-white-main px-1">
             OR
           </span>
-        </div>
+        </div> */}
         <div className="w-full flex flex-col items-center gap-4">
-          <Button state={"secondary"} className="w-full">
+          {/* <Link
+            to={`${api}/auth/google`}
+            className="text-brand-main hover:underline"
+          >
+            google
+          </Link>
+          <Button
+            state={"secondary"}
+            className="w-full"
+            onClick={continueUserWithGoogle}
+          >
             <GoogleIcon />
             Continue with Google
-          </Button>
+          </Button> */}
           <p className="font-lato text-body-sm text-black-400">
             By signing up, you agreed to our{" "}
             <Link to={"/terms"} className="text-brand-main">

@@ -1,5 +1,6 @@
-import { ReactNode, createContext, useState } from "react";
-import { getToken } from "utils/token";
+import { ReactNode, createContext, useEffect, useState } from "react";
+import { getToken, getUser } from "utils/token";
+import { TUser } from "./userContext";
 
 export const AuthContext = createContext({
   isLoggedIn: false,

@@ -24,7 +24,7 @@ export const loginSchema = z.object({
 });
 
 export const questionSchema = z.object({
-  prompt: z.string().min(1, { message: "Prompt can not be empty" }),
+  message: z.string().min(1, { message: "Prompt can not be empty" }),
 });
 
 export const emailSchema = z.object({

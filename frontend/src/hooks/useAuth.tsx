@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
+  continueWithGoogle,
   forgotPassword,
   login,
   logout,
@@ -11,13 +12,14 @@ import {
 } from "services/auth";
 // import { AuthContext } from "store/AuthContext";
 import type { TLogin, TRegister, TStatus } from "types";
-import { removeToken } from "utils/token";
+import { removeToken, removeUser } from "utils/token";
+import { useUser } from "./useUser";
 
 export const useAuth = () => {
   const [status, setStatus] = useState<TStatus>("idle");
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
-  // const { login: ALogin, logout: ALogout } = useContext(AuthContext);
+  const { getLoggedInUser } = useUser();
 
   const registerUser = async ({ email, password, fullName }: TRegister) => {
     return new Promise((resolve) => {
@@ -31,6 +33,7 @@ export const useAuth = () => {
         })
         .catch((error) => {
           // ? show error notifcation => console.log(error.response.data.message);
+          setError(error.response.data.message);
           console.log(error.response.data.message);
           setStatus("error");
         })
@@ -63,10 +66,14 @@ export const useAuth = () => {
 
       login({ email, password })
         .then((res) => {
-          resolve(res);
-          // ? show notifcation
-          setStatus("success");
-          // ALogin();
+          getLoggedInUser(res.token).then((res2) => {
+            resolve(res2);
+            localStorage.setItem("healthUser", JSON.stringify(res2));
+            // console.log(res2);
+            // ? show notifcation
+            setStatus("success");
+            navigate("/chat/new");
+          });
         })
         .catch((error) => {
           // ? show error notifcation => console.log(error.response.data.message);
@@ -148,8 +155,9 @@ export const useAuth = () => {
         .then((res) => {
           resolve(res);
           removeToken();
+          removeUser();
           // ALogout();
-          navigate("/");
+          navigate("/login");
           // ? show notifcation
           setStatus("success");
         })
@@ -162,6 +170,26 @@ export const useAuth = () => {
     });
   };
 
+  const continueUserWithGoogle = async () => {
+    return new Promise((resolve) => {
+      // setStatus("fetching");
+
+      continueWithGoogle()
+        .then((res) => {
+          resolve(res);
+          // ALogout();
+          // navigate("/");
+          // ? show notifcation
+          // setStatus("success");
+        })
+        .catch((error) => {
+          // ? show error notifcation => console.log(error.response.data.message);
+          console.log(error.response.data.message);
+          // setStatus("error");
+        })
+        .finally(() => setStatus("idle"));
+    });
+  };
   return {
     registerUser,
     verifyUserEmail,
@@ -170,6 +198,7 @@ export const useAuth = () => {
     resetUserPassword,
     resendUserOtp,
     logoutUser,
+    continueUserWithGoogle,
     status,
     error,
   };

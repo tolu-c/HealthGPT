@@ -17,14 +17,14 @@ export const MessageInput = () => {
     resolver: zodResolver(questionSchema),
   });
 
-  const handleSendQuestion = async ({ prompt }: FormData) => {
+  const handleSendQuestion = async ({ message }: FormData) => {
     try {
-      const validPrompt = questionSchema.parse({ prompt });
-      // todo => server action to send prompt
-      console.log(validPrompt);
+      const validMessage = questionSchema.parse({ message });
+      // todo => server action to send message
+      console.log(validMessage);
     } catch (error) {
       if (error instanceof ZodError) {
-        setError("prompt", { message: error.message });
+        setError("message", { message: error.message });
       } else {
         setError("root", { message: "Something went wrong. Pls Try again" });
       }
@@ -40,7 +40,7 @@ export const MessageInput = () => {
       className="w-full flex items-start gap-2"
       onSubmit={handleSubmit(onSubmit)}
     >
-      <Input register={register} name="prompt" placeholder="Type here.." />
+      <Input register={register} name="message" placeholder="Type here.." />
       <button
         className="w-12 h-12 flex-none flex items-center justify-center rounded-[10px] bg-iconButton"
         type="submit"

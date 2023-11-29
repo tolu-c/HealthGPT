@@ -6,7 +6,7 @@ const authRoutes = require('./routes/auth');
 const cors = require('cors');
 const passport = require('passport');
 const session = require('express-session');
-
+const extractUserId = require('./middleware/extractUserId')
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -26,6 +26,8 @@ const { WIT_AI_ACCESS_TOKEN, SESSION_SECRET } = process.env;
 // Middleware
 app.use(express.json());
 app.use(cors());
+app.use(express.urlencoded({extended: false}))
+
 
 // Using helmet middleware for secure headers
 app.use(helmet());

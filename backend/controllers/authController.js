@@ -1,4 +1,5 @@
-const User = require("../models/User");
+const { Message, User } = require("../models/User");
+const { Response } = require("../models/User");
 const sendEmail = require("../utils/sendEmail");
 const otpGenerator = require("otp-generator");
 const bcrypt = require("bcrypt");
@@ -7,8 +8,9 @@ const JWT_SECRET = process.env.JWT_SECRET;
 const uuid = require("uuid");
 const passport = require("passport");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
-const { Wit } = require("node-wit");
-const witClient = new Wit({ accessToken: process.env.WIT_AI_ACCESS_TOKEN });
+const axios = require("axios");
+const openaiApiKey = process.env.OPENAI_API_KEY;
+const extractUserId = require("../middleware/extractUserId");
 
 passport.serializeUser((user, done) => {
   done(null, user.id);
@@ -52,7 +54,10 @@ const authController = {
   signup: async (req, res) => {
     try {
       console.log("Received request body:", req.body);
-      const { email, password, fullName } = req.body;
+      // const { email, password, fullName } = req.body;
+      const email = req.body.email;
+      const password = req.body.password;
+      const fullName = req.body.fullName;
 
       console.log("Email:", email);
       console.log("Password:", password);
@@ -96,11 +101,9 @@ const authController = {
         `Your OTP is: ${newUser.emailVerificationOTP}`
       );
 
-      res
-        .status(201)
-        .json({
-          message: "Signup successful. Check your email for verification.",
-        });
+      res.status(201).json({
+        message: "Signup successful. Check your email for verification.",
+      });
     } catch (error) {
       console.error("Error during signup:", error);
       res.status(500).json({ message: "Internal Server Error during signup" });
@@ -125,17 +128,15 @@ const authController = {
 
       // Check if the user is verified
       if (!user.isVerified) {
-        return res
-          .status(401)
-          .json({
-            message:
-              "User not verified. Please check your email for verification.",
-          });
+        return res.status(401).json({
+          message:
+            "User not verified. Please check your email for verification.",
+        });
       }
 
-      // Generate a JWT token
+      // Generate a JWT token with expiration time set to 1 day
       const token = jwt.sign({ userId: user._id }, JWT_SECRET, {
-        expiresIn: "1h",
+        expiresIn: "1d",
       });
 
       // Send the token in the response
@@ -166,15 +167,13 @@ const authController = {
       await user.save();
 
       // Send the password reset email with the token link
-      const resetLink = `http://localhost:3000/change-password?token=${passwordResetToken}`;
+      const resetLink = `https://health-gpt-blush.vercel.app/change-password?token=${passwordResetToken}`;
       const emailText = `Click on the following link to reset your password: ${resetLink}`;
       await sendEmail(email, "Password Reset", emailText);
 
-      res
-        .status(200)
-        .json({
-          message: "Password reset instructions sent. Check your email.",
-        });
+      res.status(200).json({
+        message: "Password reset instructions sent. Check your email.",
+      });
     } catch (error) {
       console.error(error);
       res.status(500).send("Internal Server Error");
@@ -305,7 +304,7 @@ const authController = {
 
   getUser: async (req, res) => {
     try {
-      // Get the user ID from the decoded token
+      // Get the user ID from the request parameter
       const userId = req.userId;
 
       // Find the user by ID
@@ -316,7 +315,7 @@ const authController = {
 
       // Return user details
       res.status(200).json({
-        userId: user._id,
+        fullname: user.fullName,
         email: user.email,
       });
     } catch (error) {
@@ -329,45 +328,111 @@ const authController = {
 
   chat: async (req, res) => {
     try {
+      // The user ID is already attached to the request by the extractUserId middleware
+      const userId = req.userId;
       const { message } = req.body;
 
-      console.log("Received message:", message);
+      // Save user's message to the database
+      const userMessage = await Message.create({
+        content: message,
+        userId,
+      });
 
-      // Process the user's message using Wit.ai
-      const witResponse = await witClient.message(message);
-      console.log("Wit.ai response:", witResponse);
+      // Create a health-related prompt for OpenAI
+      const healthPrompt =
+        "Discuss common health issues, their symptoms, and preventive measures.";
 
-      // Extract relevant information from Wit.ai response
-      const intent =
-        witResponse.intents && witResponse.intents.length > 0
-          ? witResponse.intents[0].name
-          : "unknown";
-      const entities = witResponse.entities;
+      // Send user's message and health-related prompt to OpenAI for processing
+      const openAIResponse = await axios.post(
+        "https://api.openai.com/v1/engines/davinci-codex/completions",
+        {
+          prompt: `${message}\n${healthPrompt}`,
+          max_tokens: 1000,
+          n: 1,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${openaiApiKey}`,
+            "User-Token": req.header("x-auth-token"),
+          },
+        }
+      );
 
-      // Log the detected intent and entities
-      console.log("Detected Intent:", intent);
-      console.log("Detected Entities:", entities);
+      const aiResponse = openAIResponse.data.choices[0]?.text || "No Response";
 
-      // Perform actions based on the detected intent and entities
-      let responseMessage = "I'm sorry, I didn't understand that.";
+      // Save AI response to the database
+      const aiMessage = await Response.create({
+        content: aiResponse,
+        userId: aiBotUserId,
+      });
 
-      // Example: Handle a "health_issue" intent
-      if (
-        intent === "health_issue" &&
-        entities &&
-        entities["health_condition"] &&
-        entities["health_condition"].length > 0
-      ) {
-        const condition = entities["health_condition"][0].value;
-        // Perform logic to provide information or remedy for the health condition
-        responseMessage = `It seems you are concerned about ${condition}. Here is some information and advice...`;
-      }
-
-      // Send the response back to the user
-      res.status(200).json({ message: responseMessage });
+      // Return the IDs and content of both messages
+      res.status(200).json({
+        userMessage: {
+          id: userMessage._id,
+          content: userMessage.content,
+        },
+        aiResponse: {
+          id: aiMessage._id,
+          content: aiMessage.content,
+        },
+      });
     } catch (error) {
       console.error("Error during chat processing:", error);
       res.status(500).json({ message: "Internal Server Error" });
+    }
+  },
+
+  getChatHistory: async (req, res) => {
+    try {
+      const userId = req.userId;
+
+      // Retrieve the chat history for the logged-in user
+      const userMessages = await Message.find({ userId }).sort({
+        createdAt: "asc",
+      });
+      const aiResponses = await Response.find({
+        userId: "AI_BOT_USER_ID",
+      }).sort({ createdAt: "asc" });
+
+      // Combine and sort messages and responses based on createdAt
+      const chatHistory = [...userMessages, ...aiResponses].sort(
+        (a, b) => a.createdAt - b.createdAt
+      );
+
+      res.status(200).json({ chatHistory });
+    } catch (error) {
+      console.error("Error getting chat history:", error);
+      res
+        .status(500)
+        .json({ message: "Internal Server Error getting chat history" });
+    }
+  },
+
+  editMessage: async (req, res) => {
+    try {
+      const { messageId, newContent } = req.body;
+      const userId = req.userId;
+
+      // Check if the user owns the message
+      const userMessage = await Message.findOne({ _id: messageId, userId });
+      if (!userMessage) {
+        return res
+          .status(403)
+          .json({ message: "You are not authorized to edit this message" });
+      }
+
+      // Update the message content
+      userMessage.content = newContent;
+      await userMessage.save();
+
+      res.status(200).json({ message: "Message edited successfully" });
+    } catch (error) {
+      console.error("Error editing message:", error);
+      res
+        .status(500)
+        .json({ message: "Internal Server Error editing message" });
     }
   },
 };

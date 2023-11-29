@@ -1,5 +1,12 @@
+import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 import { VariantProps, cva } from "class-variance-authority";
-import { FC, InputHTMLAttributes, ReactNode } from "react";
+import {
+  FC,
+  HTMLInputTypeAttribute,
+  InputHTMLAttributes,
+  ReactNode,
+  useState,
+} from "react";
 import { cn } from "utils";
 
 const inputVariants = cva(
@@ -34,10 +41,35 @@ export const Input: FC<TInput> = ({
   state,
   ...props
 }) => {
+  const [inputType, setInputType] = useState<HTMLInputTypeAttribute>(type!);
+  const [isInputPassword, setIsInputPassword] = useState<boolean>(
+    type === "password"
+  );
+
+  const toggleViewPassword = () => {
+    if (inputType === "password") {
+      setInputType("text");
+    } else if (inputType === "text") {
+      setInputType("password");
+    }
+  };
+
   return (
     <div className="w-full flex flex-col items-start gap-y-1.5 relative">
+      {isInputPassword ? (
+        <span
+          className="absolute top-1/2 -translate-y-1/2 right-3 z-50 cursor-pointer"
+          onClick={toggleViewPassword}
+        >
+          {inputType === "password" ? (
+            <EyeIcon className="h-6 w-6 text-black-300" />
+          ) : (
+            <EyeSlashIcon className="h-6 w-6 text-black-300" />
+          )}
+        </span>
+      ) : null}
       <input
-        type={type}
+        type={inputType}
         id={name}
         {...register(name)}
         disabled={disabled}

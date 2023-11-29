@@ -51,6 +51,7 @@ export const RegisterPage: FC<TRegisterPage> = ({ onSaveEmail }) => {
         });
       }
       if (error instanceof AxiosError) {
+        // console.log(`Axios error on register: ${error.response?.data.message}`);
         setError("root", { message: error.response?.data.message });
       }
 
@@ -83,7 +84,6 @@ export const RegisterPage: FC<TRegisterPage> = ({ onSaveEmail }) => {
               name="email"
               register={register}
               placeholder="Email Address"
-              // disabled
               error={errors.email?.message}
             />
             <Input
@@ -91,7 +91,6 @@ export const RegisterPage: FC<TRegisterPage> = ({ onSaveEmail }) => {
               name="password"
               register={register}
               placeholder="Password"
-              // disabled
               error={errors.password?.message}
             />
           </div>
@@ -107,17 +106,17 @@ export const RegisterPage: FC<TRegisterPage> = ({ onSaveEmail }) => {
           </p>
         </form>
         {/* line */}
-        <div className="w-full flex items-center justify-center relative">
+        {/* <div className="w-full flex items-center justify-center relative">
           <span className="grow h-[1px] w-full bg-black-600"></span>
           <span className="text-black-500 text-sm font-medium leading-5 absolute left-1/2 -translate-x-1/2 z-30 bg-white-main px-1">
             OR
           </span>
-        </div>
+        </div> */}
         <div className="w-full flex flex-col items-center gap-4">
-          <Button state={"secondary"} className="w-full">
+          {/* <Button state={"secondary"} className="w-full">
             <GoogleIcon />
             Continue with Google
-          </Button>
+          </Button> */}
           <p className="font-lato text-body-sm text-black-400">
             By signing up, you agreed to our{" "}
             <Link to={"/terms"} className="text-brand-main">

@@ -72,7 +72,6 @@ export const VerifyConfirmEmail: FC<TVerifyConfirmEmail> = ({ email }) => {
             register={register}
             placeholder="Enter otp"
             error={errors.otp?.message}
-            inputMode="numeric"
           />
           <Button
             type="button"

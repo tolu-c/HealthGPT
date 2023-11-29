@@ -9,6 +9,12 @@ export const APIS = {
     resetPassword: `${api}/reset-password`,
     resendOtp: `${api}/resend-otp`,
     logout: `${api}/logout`,
+    google: `${api}/auth/google`,
   },
-  CHAT: {},
+  CHAT: {
+    chat: `${api}/chat`,
+  },
+  USER: {
+    getUser: `${api}/user`,
+  },
 };
