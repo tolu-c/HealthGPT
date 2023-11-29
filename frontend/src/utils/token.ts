@@ -11,3 +11,7 @@ export const removeToken = (): void => {
 export const getUser = (): TUser => {
   return JSON.parse(localStorage.getItem("healthUser")!);
 };
+
+export const removeUser = (): void => {
+  localStorage.removeItem("healthUser");
+};

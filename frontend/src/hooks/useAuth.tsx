@@ -12,7 +12,7 @@ import {
 } from "services/auth";
 // import { AuthContext } from "store/AuthContext";
 import type { TLogin, TRegister, TStatus } from "types";
-import { removeToken } from "utils/token";
+import { removeToken, removeUser } from "utils/token";
 import { useUser } from "./useUser";
 
 export const useAuth = () => {
@@ -33,6 +33,7 @@ export const useAuth = () => {
         })
         .catch((error) => {
           // ? show error notifcation => console.log(error.response.data.message);
+          setError(error.response.data.message);
           console.log(error.response.data.message);
           setStatus("error");
         })
@@ -66,11 +67,12 @@ export const useAuth = () => {
       login({ email, password })
         .then((res) => {
           getLoggedInUser(res.token).then((res2) => {
+            resolve(res2);
             localStorage.setItem("healthUser", JSON.stringify(res2));
             // console.log(res2);
-            resolve(res2);
             // ? show notifcation
             setStatus("success");
+            navigate("/chat/new");
           });
         })
         .catch((error) => {
@@ -153,8 +155,9 @@ export const useAuth = () => {
         .then((res) => {
           resolve(res);
           removeToken();
+          removeUser();
           // ALogout();
-          navigate("/");
+          navigate("/login");
           // ? show notifcation
           setStatus("success");
         })

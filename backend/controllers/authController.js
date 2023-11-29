@@ -167,7 +167,7 @@ const authController = {
       await user.save();
 
       // Send the password reset email with the token link
-      const resetLink = `https://health-gpt-blush.vercel.app/change-password?token${passwordResetToken}`;
+      const resetLink = `https://health-gpt-blush.vercel.app/change-password?token=${passwordResetToken}`;
       const emailText = `Click on the following link to reset your password: ${resetLink}`;
       await sendEmail(email, "Password Reset", emailText);
 

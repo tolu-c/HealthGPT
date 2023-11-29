@@ -1,44 +1,47 @@
 import { Loader } from "components/ui/Loader";
-import { Fragment, Suspense, lazy, useEffect, useState } from "react";
-import { Route, Routes } from "react-router-dom";
-import { getToken } from "utils/token";
+import { Fragment, Suspense, lazy, useContext, useState } from "react";
+import { Navigate, Route, Routes } from "react-router-dom";
+import { UserContext } from "store/userContext";
+import { getUser } from "utils/token";
 
 // routes
 const Home = lazy(() => import("./routes/Home"));
 const Login = lazy(() => import("./routes/Login"));
 const Register = lazy(() => import("./routes/Register"));
-const LoggedIn = lazy(() => import("./routes/LoggedIn"));
 const VerifyEmail = lazy(() => import("./routes/VerifyEmail"));
 const ForgotPassword = lazy(() => import("./routes/ForgotPassword"));
 const ChangePassword = lazy(() => import("./routes/ChangePassword"));
-// const ConfirmEmail = lazy(() => import("./routes/ConfirmEmail"));
 const PasswordChangeSuccess = lazy(
   () => import("./routes/PasswordChangeSuccess")
 );
 const VerificationSuccess = lazy(() => import("./routes/VerificationSuccess"));
 const ResetPassword = lazy(() => import("./routes/ResetPassword"));
+// chat routes
+const Chat = lazy(() => import("./routes/Chat"));
+const NewChat = lazy(() => import("./routes/NewChat"));
 
 function App() {
   const [userEmail, setUserEmail] = useState<string>("");
-  const [isLoggedIn, setLoggedIn] = useState<boolean>(false);
-  const userHealthToken = getToken();
-
-  // TODO => fix user logging in
+  const { user } = useContext(UserContext);
 
   const receiveUserEmail = (email: string) => {
     setUserEmail(email);
   };
 
-  useEffect(() => {
-    if (userHealthToken) {
-      setLoggedIn(true);
-    }
-  }, [userHealthToken, isLoggedIn]);
-
   return (
     <Fragment>
       <Suspense fallback={<Loader />}>
         <Routes>
+          <Route path="/" element={<Home />} />
+          {user && (
+            <>
+              <Route
+                path="chat/:chatID"
+                element={user ? <Chat /> : <Navigate to={"/login"} />}
+              />
+              <Route path="chat/new" element={<NewChat />} />
+            </>
+          )}
           <Route path="login" element={<Login />} />
           <Route
             path="register"
@@ -48,7 +51,6 @@ function App() {
             path="verify-email"
             element={<VerifyEmail email={userEmail} />}
           />
-          {/* <Route path="confirm-email" element={<ConfirmEmail />} /> */}
           <Route path="forgot-password" element={<ForgotPassword />} />
           <Route path="change-password" element={<ChangePassword />} />
           <Route path="reset-password" element={<ResetPassword />} />
@@ -60,7 +62,6 @@ function App() {
             path="verification-success"
             element={<VerificationSuccess />}
           />
-          <Route path="/*" element={isLoggedIn ? <LoggedIn /> : <Home />} />
         </Routes>
       </Suspense>
     </Fragment>
