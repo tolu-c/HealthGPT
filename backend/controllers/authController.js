@@ -1,3 +1,19 @@
+<<<<<<< HEAD
+
+  const { Message, User } = require('../models/User');
+  const { Response } = require('../models/User');
+  const sendEmail = require('../utils/sendEmail');
+  const otpGenerator = require('otp-generator');
+  const bcrypt = require('bcrypt');
+  const jwt = require('jsonwebtoken');
+  const JWT_SECRET = process.env.JWT_SECRET;
+  const uuid = require('uuid');
+  const passport = require('passport'); 
+  const GoogleStrategy = require('passport-google-oauth20').Strategy;
+  const axios = require('axios');
+  const openaiApiKey = process.env.OPENAI_API_KEY;
+  const extractUserId = require('../middleware/extractUserId');
+=======
 const { Message, User } = require("../models/User");
 const { Response } = require("../models/User");
 const sendEmail = require("../utils/sendEmail");
@@ -15,6 +31,7 @@ const extractUserId = require("../middleware/extractUserId");
 passport.serializeUser((user, done) => {
   done(null, user.id);
 });
+>>>>>>> ad92de0682e7dcfc14c6589b22a3676b3b6d4d23
 
 passport.deserializeUser((id, done) => {
   User.findById(id, (err, user) => {
@@ -53,6 +70,17 @@ passport.use(
 const authController = {
   signup: async (req, res) => {
     try {
+<<<<<<< HEAD
+      // Check if the user already exists in your database by their Google ID
+      const existingUser = await User.findOne({ googleId: profile.id });
+  
+      if (existingUser) {
+        // If the user exists, return the user
+        return done(null, existingUser);
+      }
+  
+      // If the user doesn't exist, create a new user in your database
+=======
       console.log("Received request body:", req.body);
       // const { email, password, fullName } = req.body;
       const email = req.body.email;
@@ -83,6 +111,7 @@ const authController = {
       console.log("Password after hashing:", hashedPassword);
 
       // Create a new user in the database with email verification status set to false
+>>>>>>> ad92de0682e7dcfc14c6589b22a3676b3b6d4d23
       const newUser = await User.create({
         email,
         password: hashedPassword,
@@ -93,6 +122,80 @@ const authController = {
         }),
         fullName,
       });
+<<<<<<< HEAD
+  
+      // Return the newly created user
+      return done(null, newUser);
+    } catch (error) {
+      // Handle any errors that occur during the process
+      return done(error, null);
+    }
+  }));
+    async function getOpenAIResponse(prompt) {
+      try {
+        const openaiApiKey = 'process.env.OPENAI_API_KEY'; 
+        const apiUrl = 'https://api.openai.com/v1/engines/davinci-codex/completions';
+    
+        const response = await axios.post(
+          apiUrl,
+          {
+            prompt,
+            max_tokens: 1000,
+            n: 1,
+          },
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${openaiApiKey}`,
+            },
+          }
+        );
+    
+        return response.data.choices[0]?.text || 'No Response';
+      } catch (error) {
+        console.error('Error making API request to OpenAI:', error);
+        return 'Error';
+      }
+    }
+    const authController = {
+    signup: async (req, res) => {
+      try {
+        console.log('Received request body:', req.body);
+        // const { email, password, fullName } = req.body;
+        const email = req.body.email;
+        const password = req.body.password
+        const fullName = req.body.fullName
+
+  
+        console.log('Email:', email);
+        console.log('Password:', password);
+        console.log('Full Name:', fullName);
+  
+        // Check if the user already exists
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+          return res.status(400).json({ message: 'User already exists with this email.' });
+        }
+  
+        // Check if the password is provided
+        if (!password) {
+          console.log('Password is missing!');
+          return res.status(400).json({ message: 'Password is required.' });
+        }
+  
+        // Hash the password
+        console.log('Password before hashing:', password);
+        const hashedPassword = await bcrypt.hash(password, 10);
+        console.log('Password after hashing:', hashedPassword);
+  
+        // Create a new user in the database with email verification status set to false
+        const newUser = await User.create({
+          email,
+          password: hashedPassword,
+          isVerified: false, 
+          emailVerificationOTP: otpGenerator.generate(6, { upperCase: false, specialChars: false }),
+          fullName,
+=======
 
       // Send email verification OTP
       await sendEmail(
@@ -131,8 +234,42 @@ const authController = {
         return res.status(401).json({
           message:
             "User not verified. Please check your email for verification.",
+>>>>>>> ad92de0682e7dcfc14c6589b22a3676b3b6d4d23
         });
       }
+<<<<<<< HEAD
+    },
+  
+    login: async (req, res) => {
+      try {
+        const { email, password } = req.body;
+    
+        // Find the user by email
+        const user = await User.findOne({ email });
+        if (!user) {
+          return res.status(404).json({ message: 'User not found' });
+        }
+    
+        // Check the password
+        const validPassword = await bcrypt.compare(password, user.password);
+        if (!validPassword) {
+          return res.status(401).json({ message: 'Invalid password' });
+        }
+    
+        // Check if the user is verified
+        if (!user.isVerified) {
+          return res.status(401).json({ message: 'User not verified. Please check your email for verification.' });
+        }
+    
+        // Generate a JWT token with expiration time set to 1 day
+        const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '1d' });
+    
+        // Send the token in the response
+        res.json({ token, message: 'Login successful' });
+      } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal Server Error');
+=======
 
       // Generate a JWT token with expiration time set to 1 day
       const token = jwt.sign({ userId: user._id }, JWT_SECRET, {
@@ -155,6 +292,7 @@ const authController = {
       const user = await User.findOne({ email });
       if (!user) {
         return res.status(404).json({ message: "User not found" });
+>>>>>>> ad92de0682e7dcfc14c6589b22a3676b3b6d4d23
       }
 
       // Generate a password reset token
@@ -255,11 +393,23 @@ const authController = {
         user.isVerified = true;
         await user.save();
 
+<<<<<<< HEAD
+        // Send the password reset email with the token link
+        const resetLink = `https://health-gpt-blush.vercel.app/change-password?token${passwordResetToken}`;
+        const emailText = `Click on the following link to reset your password: ${resetLink}`;
+        await sendEmail(email, 'Password Reset', emailText);
+
+        res.status(200).json({ message: 'Password reset instructions sent. Check your email.' });
+      } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal Server Error');
+=======
         res.status(200).json({ message: "Email verified successfully." });
       } else {
         res
           .status(401)
           .json({ message: "Invalid OTP. Email verification failed." });
+>>>>>>> ad92de0682e7dcfc14c6589b22a3676b3b6d4d23
       }
     } catch (error) {
       console.error(error);
@@ -313,6 +463,116 @@ const authController = {
         return res.status(404).json({ message: "User not found" });
       }
 
+<<<<<<< HEAD
+    getUser: async (req, res) => {
+      try {
+        // Get the user ID from the request parameter
+        const userId = req.params.userId; 
+        
+        // Find the user by ID
+        const user = await User.findById(userId);
+        if (!user) {
+          return res.status(404).json({ message: 'User not found' });
+        }
+    
+        // Return user details
+        res.status(200).json({
+          fullname: user.fullName, 
+          email: user.email,
+        });
+      } catch (error) {
+        console.error('Error getting user details:', error);
+        res.status(500).json({ message: 'Internal Server Error getting user details' });
+      }
+    
+    },
+
+    chat: async (req, res) => {
+      try {
+        const userId = req.userId;
+        const { message } = req.body;
+  
+        // Save user's message to the database
+        const userMessage = await Message.create({
+          content: message,
+          userId,
+        });
+  
+        // Create a health-related prompt for OpenAI
+        const healthPrompt = 'Discuss common health issues, their symptoms, and preventive measures.';
+  
+        // Use a specific identifier for AI bot's user ID
+        const aiBotUserId = 'AI_BOT_USER_ID';
+  
+        // Get AI response from OpenAI
+        const aiResponse = await getOpenAIResponse(`${message}\n${healthPrompt}`);
+  
+        // Save AI response to the database
+        const aiMessage = await Response.create({
+          content: aiResponse,
+          userId: aiBotUserId,
+        });
+  
+        // Return the IDs and content of both messages
+        res.status(200).json({
+          userMessage: {
+            id: userMessage._id,
+            content: userMessage.content,
+          },
+          aiResponse: {
+            id: aiMessage._id,
+            content: aiMessage.content,
+          },
+        });
+      } catch (error) {
+        console.error('Error during chat processing:', error);
+        res.status(500).json({ message: 'Internal Server Error' });
+      }
+    },
+    
+    getChatHistory: async (req, res) => {
+      try {
+        const userId = req.userId; 
+  
+        // Retrieve the chat history for the logged-in user
+        const userMessages = await Message.find({ userId }).sort({ createdAt: 'asc' });
+        const aiResponses = await Response.find({ userId: 'AI_BOT_USER_ID' }).sort({ createdAt: 'asc' });
+  
+        // Combine and sort messages and responses based on createdAt
+        const chatHistory = [...userMessages, ...aiResponses].sort((a, b) => a.createdAt - b.createdAt);
+  
+        res.status(200).json({ chatHistory });
+      } catch (error) {
+        console.error('Error getting chat history:', error);
+        res.status(500).json({ message: 'Internal Server Error getting chat history' });
+      }
+    },
+  
+    editMessage: async (req, res) => {
+      try {
+        const { messageId, newContent } = req.body;
+        const userId = req.userId; 
+    
+        // Check if the user owns the message
+        const userMessage = await Message.findOne({ _id: messageId, userId });
+        if (!userMessage) {
+          return res.status(403).json({ message: 'You are not authorized to edit this message' });
+        }
+    
+        // Update the message content
+        userMessage.content = newContent;
+        await userMessage.save();
+    
+        res.status(200).json({ message: 'Message edited successfully' });
+      } catch (error) {
+        console.error('Error editing message:', error);
+        res.status(500).json({ message: 'Internal Server Error editing message' });
+      }
+    },
+  };
+
+  module.exports = authController;
+=======
       // Return user details
       res.status(200).json({
         fullname: user.fullName,
@@ -438,3 +698,4 @@ const authController = {
 };
 
 module.exports = authController;
+>>>>>>> ad92de0682e7dcfc14c6589b22a3676b3b6d4d23
